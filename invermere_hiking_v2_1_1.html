@@ -1,0 +1,459 @@
+```html
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Invermere Group Hiking — V2.1.1</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+body{font-family:Arial,sans-serif;max-width:1000px;margin:auto;padding:20px;background:#f5f4ef;color:#20231f}
+section{background:white;padding:18px;margin:14px 0;border:1px solid #ddd;border-radius:12px}
+select,button{padding:10px;margin:5px;width:100%;font-size:15px}
+button{background:#2f6548;color:white;border:0;border-radius:8px;font-weight:bold}
+.status{padding:12px;border-radius:8px;margin-top:10px}
+.clear{background:#e8f5ec}
+.hold{background:#fff4d9}
+.block{background:#fde7e7}
+.post{white-space:pre-wrap;border:1px solid #ddd;padding:14px;border-radius:8px;margin:12px 0}
+.small{color:#666;font-size:13px}
+</style>
+</head>
+
+<body>
+
+<h1>Invermere Group Hiking — Content Engine V2.1.1</h1>
+
+<section>
+<h2>🔥 Live wildfire check</h2>
+<p class="small">
+Checks official BC current-fire data.
+Relevant active fire or failed data check = HOLD.
+</p>
+
+<button onclick="checkFire()">Check current wildfire data</button>
+
+<div id="fire" class="status hold">
+HOLD — Not checked yet. Run the live check first.
+</div>
+</section>
+
+
+<section>
+<h2>This week's context</h2>
+
+<label>Season</label>
+<select id="season">
+<option>Off-season</option>
+<option>Shoulder season</option>
+<option selected>Peak hiking season</option>
+<option>Winter</option>
+</select>
+
+<label>Recent activity</label>
+<select id="activity">
+<option>Very quiet</option>
+<option selected>Some activity</option>
+<option>Already active</option>
+</select>
+
+<label>Recent Connect posts</label>
+<select id="connect">
+<option>None recently</option>
+<option>One recently</option>
+<option>Several recently</option>
+</select>
+
+<label>Recent member hike reports</label>
+<select id="reports">
+<option>None recently</option>
+<option>A few recently</option>
+<option>Lots recently</option>
+</select>
+
+</section>
+
+
+<section>
+<h2>Manual Safety Gate</h2>
+
+<label>🚨 Evacuation</label>
+<select id="evac">
+<option>CLEAR</option>
+<option>ALERT</option>
+<option>ORDER</option>
+</select>
+
+<label>💨 Smoke</label>
+<select id="smoke">
+<option>CLEAR</option>
+<option>CAUTION</option>
+<option>HOLD</option>
+<option>BLOCK</option>
+</select>
+
+<label>🚧 Access</label>
+<select id="access">
+<option>CLEAR</option>
+<option>HOLD</option>
+<option>BLOCK</option>
+</select>
+
+<label>🌦️ Weather</label>
+<select id="weather">
+<option>NOT RELEVANT</option>
+<option>CLEAR</option>
+<option>HOLD</option>
+<option>BLOCK</option>
+</select>
+
+<button onclick="run()">Run this week's engine</button>
+
+<div id="gate"></div>
+</section>
+
+
+<section>
+<h2>Recommendations</h2>
+<div id="results">Run the wildfire check first.</div>
+</section>
+
+
+<script>
+
+let fireState="UNCHECKED";
+
+const regions=[
+["Invermere / Windermere",50.507,-116.024,25],
+["Wilmer / Panorama / Toby Creek",50.73,-116.17,35],
+["Fairmont / Columbia Lake",50.33,-115.85,35],
+["Canal Flats",50.17,-115.85,25]
+];
+
+const posts=[
+["Connect people",
+"Anyone heading out for a hike around Invermere in the next little while and open to having someone join them? Feel free to post what day you’re going and what kind of hike you have in mind.",
+"hike"],
+
+["Connect people",
+"A reminder that if you’d rather not hike alone, you’re welcome to post here and see if anyone wants to join you. Even a rough plan is enough — day, general area and what kind of hike you’re looking for.",
+"hike"],
+
+["Local knowledge",
+"For anyone who has been on the trails around Invermere recently: what’s one useful thing you learned about access, parking, trail conditions or timing that you wish you’d known before going?",
+"conditions"],
+
+["Local knowledge",
+"What’s a good Invermere-area hike for someone who wants something scenic without needing a huge day or a super technical trail?",
+"hike"],
+
+["Discussion",
+"I’m curious how people choose a hike when they’re only in Invermere for a couple of days: repeat an old favourite, or try somewhere new?",
+"discussion"],
+
+["Seasonal/off-season",
+"For the people who only get to Invermere a few times a year: do you usually start planning your hikes before the trip, or decide once you see the weather and conditions?",
+"discussion"],
+
+["Seasonal/off-season",
+"Off-season question: what’s one Invermere-area hike you keep thinking about doing again when the right season comes around?",
+"discussion"]
+];
+
+
+function dist(a,b,c,d){
+let R=6371,
+p=Math.PI/180,
+x=Math.sin((c-a)*p/2)**2+
+Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2;
+
+return 2*R*Math.asin(Math.sqrt(x));
+}
+
+
+/*
+V2.1.1 FIRE CONNECTION
+
+The request is made directly to the official BC ArcGIS
+service. We keep the safety rule that ANY failed verification
+results in HOLD.
+
+The diagnostic information is now displayed so we can see
+what actually happened if the browser blocks the request.
+*/
+
+async function checkFire(){
+
+fireState="CHECKING";
+
+const fireBox=document.getElementById("fire");
+
+fireBox.className="status hold";
+
+fireBox.textContent=
+"CHECKING — Contacting official BC current-fire data…";
+
+
+const q=new URLSearchParams({
+where:"1=1",
+outFields:"*",
+returnGeometry:"false",
+f:"json"
+});
+
+
+const url=
+"https://delivery.maps.gov.bc.ca/arcgis/rest/services/mpcm/bcgwpub/MapServer/502/query?"+
+q.toString();
+
+
+try{
+
+const r=await fetch(url,{
+method:"GET",
+mode:"cors",
+cache:"no-store"
+});
+
+
+if(!r.ok){
+
+throw new Error(
+"HTTP "+r.status+" "+r.statusText
+);
+
+}
+
+
+const text=await r.text();
+
+
+let d;
+
+try{
+
+d=JSON.parse(text);
+
+}catch(parseError){
+
+throw new Error(
+"BC service returned a response that was not valid JSON."
+);
+
+}
+
+
+if(d.error){
+
+throw new Error(
+"d.error: "+
+(d.error.message||"Unknown ArcGIS error")
+);
+
+}
+
+
+if(!Array.isArray(d.features)){
+
+throw new Error(
+"BC service response did not contain a feature list."
+);
+
+}
+
+
+let found=[];
+
+
+for(let f of d.features){
+
+let a=f.attributes||{};
+
+let lat=Number(a.LATITUDE);
+let lng=Number(a.LONGITUDE);
+
+
+if(!Number.isFinite(lat)||!Number.isFinite(lng))
+continue;
+
+
+let status=
+String(a.FIRE_STATUS||"").toLowerCase();
+
+
+if(status.includes("out"))
+continue;
+
+
+for(let z of regions){
+
+if(
+dist(z[1],z[2],lat,lng)<=z[3]
+){
+
+found.push(
+(a.INCIDENT_NAME||"Unnamed fire")+
+" — "+z[0]
+);
+
+break;
+
+}
+
+}
+
+}
+
+
+fireState=found.length?"HOLD":"CLEAR";
+
+
+fireBox.className=
+"status "+
+(fireState==="CLEAR"?"clear":"hold");
+
+
+if(fireState==="CLEAR"){
+
+fireBox.textContent=
+"CLEAR — No relevant active fires detected.";
+
+}else{
+
+fireBox.textContent=
+"HOLD — Relevant active fire(s) detected: "+
+found.join("; ");
+
+}
+
+
+}catch(e){
+
+fireState="HOLD";
+
+fireBox.className="status hold";
+
+
+let reason=
+e&&e.message?
+e.message:
+"Unknown browser/network error";
+
+
+fireBox.textContent=
+"HOLD — DATA CHECK FAILED. "+
+"Do not publish until manually reviewed. "+
+"Diagnostic: "+reason;
+
+}
+
+}
+
+
+function run(){
+
+let e=evac.value,
+s=smoke.value,
+a=access.value,
+w=weather.value,
+level="CLEAR";
+
+
+if(
+fireState!=="CLEAR"||
+e==="ORDER"||
+s==="BLOCK"||
+a==="BLOCK"||
+w==="BLOCK"
+){
+
+level=
+(e==="ORDER"||
+s==="BLOCK"||
+a==="BLOCK"||
+w==="BLOCK")
+?"BLOCK"
+:"HOLD";
+
+}
+
+
+else if(
+s==="HOLD"||
+a==="HOLD"||
+w==="HOLD"
+){
+
+level="HOLD";
+
+}
+
+
+let g=document.getElementById("gate");
+
+g.className=
+"status "+level.toLowerCase();
+
+
+g.textContent=
+level+" — "+
+(
+level==="CLEAR"
+?"Safety gate passed."
+:
+level==="BLOCK"
+?"Do not publish."
+:
+"Pause publishing and review conditions."
+);
+
+
+let out=document.getElementById("results");
+
+
+if(level!=="CLEAR"){
+
+out.innerHTML=
+"<b>No recommendations while the safety gate is "+
+level+".</b>";
+
+return;
+
+}
+
+
+let filtered=posts.filter(p=>!(
+(
+e==="ALERT"||
+s==="CAUTION"
+)
+&&
+(
+p[2]==="hike"||
+p[2]==="conditions"
+)
+));
+
+
+let picks=filtered.slice(0,3);
+
+
+out.innerHTML=
+picks.map(p=>
+'<div class="post">'+
+'<b>'+p[0]+'</b><br><br>'+
+p[1]+
+'<br><br>'+
+'<button onclick="navigator.clipboard.writeText('+
+JSON.stringify(p[1])+
+')">Copy post</button>'+
+'</div>'
+).join("");
+
+}
+
+</script>
+
+</body>
+</html>
+```
