@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Invermere Group Hiking — V2.4.1</title>
+<title>Invermere Group Hiking — V2.4.2</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
@@ -80,7 +80,7 @@ background:#f5f5f5
 
 <body>
 
-<h1>Invermere Group Hiking — Content Engine V2.4.1</h1>
+<h1>Invermere Group Hiking — Content Engine V2.4.2</h1>
 
 
 <section>
@@ -270,20 +270,25 @@ const regions=[
    CONTENT ENGINE
    =========================================================
 
+   CONTENT MIX:
+   About 50% complete thoughts with an actual point.
+   About 30% thought + short natural question.
+   About 20% casual discussion starters.
+
    IMPORTANT:
-   These posts are intentionally NOT written as engagement
-   prompts.
-
-   They should feel like ordinary thoughts or observations
-   someone might casually put into a hiking group.
-
-   They must NOT invent:
+   Posts must NOT invent:
    - memories
    - personal experiences
    - current observations
    - being physically in Invermere
-   - having recently seen a trail
-   - having personally completed a hike
+   - recently seeing a trail
+   - personally completing a hike
+
+   The goal is:
+   "a real person had something mildly interesting to say"
+
+   NOT:
+   "a group admin needs people to comment"
 */
 
 
@@ -294,78 +299,98 @@ const regions=[
 const normalPosts=[
 
 {
-type:"observation",
-text:"There are so many hikes around Invermere that it seems like the same handful always come up first."
+style:"complete",
+text:"Some hikes around Invermere get recommended so often that it's easy to forget there are probably a bunch of others people quietly love just as much."
 },
 
 {
-type:"observation",
-text:"Some trails seem to become the ones everyone knows about, while others barely get mentioned."
+style:"complete",
+text:"A hike doesn't have to be a huge day to be worth doing. Having a few shorter trails that still feel like a proper outing is useful too."
 },
 
 {
-type:"observation",
-text:"It's kind of interesting how many different hiking areas there are around Invermere for a relatively small area."
+style:"complete",
+text:"Some hikes are worth repeating because they're spectacular, and some are worth repeating simply because they fit into a normal day. Both kinds are good to have nearby."
 },
 
 {
-type:"thought",
-text:"A good hike doesn't necessarily have to be a huge day. Some of the shorter ones can be just as worthwhile."
+style:"complete",
+text:"There must be a few Invermere-area trails that are much more popular with locals than they appear to be online."
 },
 
 {
-type:"thought",
-text:"There are probably a lot of Invermere-area hikes that people don't get around to simply because there are so many options."
+style:"complete",
+text:"The best-known hikes aren't necessarily the only ones worth knowing about. Sometimes a trail probably gets overlooked simply because there are so many options nearby."
 },
 
 {
-type:"thought",
-text:"Some hikes seem to be worth doing more than once, even when there are still lots of other trails around."
+style:"complete",
+text:"A trail can be technically nothing special and still end up being one people return to again and again."
 },
 
 {
-type:"discussion",
-text:"Favourite hikes seem to depend so much on what someone actually wants out of the day."
+style:"complete",
+text:"Some hikes are mostly about the destination, while others are enjoyable because the whole trail is part of the experience. Those can be completely different kinds of favourites."
 },
 
 {
-type:"discussion",
-text:"Scenery, distance, elevation and how much effort a hike takes can all make a pretty big difference in whether a trail feels worth doing."
+style:"complete",
+text:"A good local hiking area probably needs both: the big hikes people look forward to and the easier ones that are there when a full-day adventure isn't the plan."
 },
 
 {
-type:"discussion",
-text:"It seems like everyone has a few trails they would happily recommend without having to think very hard about it."
+style:"complete",
+text:"There are enough different hiking areas around Invermere that two people could spend years hiking there and still come away with completely different favourite trails."
 },
 
 {
-type:"local",
-text:"There are still quite a few hiking areas around Invermere that probably don't get nearly as much attention as the better-known ones."
+style:"complete",
+text:"Sometimes the hike that ends up being most useful isn't the most dramatic one. It's the one that works when there's only a few hours available."
 },
 
 {
-type:"local",
-text:"The area around Invermere has a pretty wide range of hikes, from short outings to much bigger days."
+style:"question",
+text:"There are some hikes that sound good for years before actually making it onto the calendar. Any around Invermere that have been sitting on your list for a while?"
 },
 
 {
-type:"local",
-text:"The different hiking areas around Invermere have such different types of terrain that it's hard to really lump them all together."
+style:"question",
+text:"Some trails become favourites almost immediately, while others take a second visit to really appreciate. Have you had that happen with any around Invermere?"
 },
 
 {
-type:"casual",
-text:"Some hikes are probably more about the destination, while others are enjoyable just because the trail itself is nice."
+style:"question",
+text:"There are so many hikes around Invermere that it seems like the same handful always come up first. Are there any good ones that don't get mentioned as much?"
 },
 
 {
-type:"casual",
-text:"It's funny how a place can have a huge number of trails and people still end up returning to the same few."
+style:"question",
+text:"A lot of people probably have a few hikes they keep coming back to, even with so many others nearby. Do you have one?"
 },
 
 {
-type:"casual",
-text:"There are definitely enough hiking options around Invermere to keep someone busy for a long time."
+style:"question",
+text:"Some trails seem to have a reputation that makes people want to try them, while others are discovered almost by accident. Which kind do you usually end up doing?"
+},
+
+{
+style:"question",
+text:"A shorter hike can sometimes make more sense than turning every outing into a full-day adventure. Are there any around Invermere you think are especially good for that?"
+},
+
+{
+style:"casual",
+text:"Scenery or a good trail itself — which matters more?"
+},
+
+{
+style:"casual",
+text:"Big destination or enjoyable trail the whole way?"
+},
+
+{
+style:"casual",
+text:"Repeat an old favourite or try somewhere new?"
 }
 
 ];
@@ -378,53 +403,88 @@ text:"There are definitely enough hiking options around Invermere to keep someon
 const quietPosts=[
 
 {
-type:"observation",
-text:"There are a lot of hiking areas around Invermere that don't seem to get talked about nearly as much as the familiar ones."
+style:"complete",
+text:"Some trails seem to quietly become favourites without ever being the ones everyone talks about."
 },
 
 {
-type:"observation",
-text:"Some trails seem to quietly become favourites without being the ones everyone talks about."
+style:"complete",
+text:"There are a lot of hiking areas around Invermere that don't seem to get talked about nearly as much as the familiar ones. Some of those are probably worth knowing about too."
 },
 
 {
-type:"thought",
-text:"It can be surprisingly hard to choose between a bunch of good hiking options."
+style:"complete",
+text:"When there are enough hiking options, it seems almost inevitable that some genuinely good trails get overshadowed by the ones everyone already knows."
 },
 
 {
-type:"thought",
-text:"A shorter hike can sometimes make a lot more sense than turning every outing into a full-day adventure."
+style:"complete",
+text:"Not every good hike needs to be a major objective. Sometimes having a reliable shorter option nearby is more useful than another huge day on the list."
 },
 
 {
-type:"thought",
-text:"There are probably quite a few Invermere-area trails that people have meant to try for years and just haven't gotten around to."
+style:"complete",
+text:"Some of the better trails are probably the ones that fit different kinds of days, rather than only being worth doing when everything lines up perfectly."
 },
 
 {
-type:"local",
-text:"The amount of hiking around Invermere is pretty impressive when you start looking beyond the most familiar trails."
+style:"complete",
+text:"A hiking area can have a handful of famous trails and still have plenty of other places that are just quietly enjoyed by the people who know about them."
 },
 
 {
-type:"local",
-text:"Different parts of the valley seem to offer pretty different kinds of hiking."
+style:"complete",
+text:"There are probably more trails around Invermere that deserve a second look than the usual recommendations would suggest."
 },
 
 {
-type:"casual",
-text:"Some trails are probably underrated simply because there are so many other options nearby."
+style:"complete",
+text:"Having too many hiking options is a nice problem to have, but it probably also means some trails stay overlooked for no particular reason."
 },
 
 {
-type:"casual",
-text:"It seems like having a few reliable favourite hikes is almost unavoidable when there are this many trails around."
+style:"complete",
+text:"The hikes that get talked about most aren't always the same ones people actually end up doing most often."
 },
 
 {
-type:"casual",
-text:"There are a lot of ways to make a hiking day out of the Invermere area without necessarily choosing one of the bigger objectives."
+style:"complete",
+text:"A trail doesn't need to be the biggest, hardest or most famous one around to become part of someone's regular rotation."
+},
+
+{
+style:"question",
+text:"There are probably a few Invermere-area hikes that don't get mentioned very often but have their own loyal fans. Any come to mind?"
+},
+
+{
+style:"question",
+text:"Some trails seem to quietly become favourites without ever being the obvious recommendation. Do you have one like that?"
+},
+
+{
+style:"question",
+text:"There are plenty of hiking options around Invermere without every outing needing to be a huge objective. What makes a trail worth doing for you when time is limited?"
+},
+
+{
+style:"question",
+text:"Sometimes a trail is good enough to repeat, even when there are still lots of others left to try. Which ones are worth going back to?"
+},
+
+{
+style:"casual",
+text:"Underrated hike or classic favourite?"
+},
+
+{
+style:"casual",
+text:"Do you usually know the hike you want to do before the day, or decide when the time comes?"
+},
+
+{
+style:"casual",
+text:"What makes a trail worth repeating?"
 }
 
 ];
@@ -437,53 +497,93 @@ text:"There are a lot of ways to make a hiking day out of the Invermere area wit
 const activePosts=[
 
 {
-type:"observation",
-text:"It's interesting how certain hikes around Invermere seem to become the default recommendations."
+style:"complete",
+text:"It's interesting how certain hikes around Invermere become the default recommendations, even though there are enough options for people to have completely different favourites."
 },
 
 {
-type:"observation",
-text:"There are enough hiking options around Invermere that people could probably have completely different lists of favourites."
+style:"complete",
+text:"The variety of hiking around Invermere probably explains why people's favourite trails can be so different. A good hike depends a lot on what someone actually wants from the day."
 },
 
 {
-type:"thought",
-text:"A trail doesn't necessarily have to be difficult to be one of the better hikes in an area."
+style:"complete",
+text:"A trail doesn't necessarily have to be difficult to be one of the better hikes in an area. Sometimes the balance of scenery, effort and time is the whole point."
 },
 
 {
-type:"thought",
-text:"Some of the best hiking days are probably the ones that don't require turning the whole day into an expedition."
+style:"complete",
+text:"Some hikes are impressive because of where they go, and others because they're simply enjoyable from beginning to end. It's not always the biggest objective that makes the best day."
 },
 
 {
-type:"discussion",
-text:"The best hike probably depends a lot on whether the goal is scenery, exercise, a long day out, or just getting outside for a while."
+style:"complete",
+text:"With enough trails nearby, a favourite list probably says as much about the kind of hiking someone enjoys as it does about the trails themselves."
 },
 
 {
-type:"discussion",
-text:"There seem to be a lot of different opinions on what actually makes a hike worth repeating."
+style:"complete",
+text:"A good hiking area needs variety. Not every day calls for the same distance, effort or type of trail."
 },
 
 {
-type:"local",
-text:"The variety of hiking around Invermere is one of the things that makes the area interesting."
+style:"complete",
+text:"Some trails probably stay favourites because they're spectacular, while others stay favourites because they're easy to fit into real life."
 },
 
 {
-type:"local",
-text:"There are quite a few different hiking areas within reach of Invermere, and they don't all offer the same kind of experience."
+style:"complete",
+text:"There are quite a few different hiking areas within reach of Invermere, and they don't all offer the same kind of experience. That variety is part of what makes choosing difficult."
 },
 
 {
-type:"casual",
-text:"It's easy to keep adding hikes to a list without ever running out of possibilities around here."
+style:"complete",
+text:"Sometimes the best trail for the day isn't the most exciting one on paper. It's just the one that fits the time and energy available."
 },
 
 {
-type:"casual",
-text:"Some trails probably stay favourites simply because they fit easily into a normal day."
+style:"complete",
+text:"A hike can be memorable for completely different reasons. The biggest views aren't necessarily the only thing people remember about a good day out."
+},
+
+{
+style:"question",
+text:"There are enough hiking options around Invermere that people could probably make completely different lists of favourites. Which hike would definitely make yours?"
+},
+
+{
+style:"question",
+text:"Some hikes seem to become the default recommendation for a reason, but that doesn't mean they're everyone's favourite. Is there one you think deserves the reputation?"
+},
+
+{
+style:"question",
+text:"A trail doesn't have to be difficult to be worthwhile. Which matters more to you: the scenery or the challenge?"
+},
+
+{
+style:"question",
+text:"Some hikes are worth repeating even when there are plenty of others left to try. Which ones keep making it back into the rotation?"
+},
+
+{
+style:"question",
+text:"Different people want completely different things from a hike. What usually makes one stand out to you?"
+},
+
+{
+style:"casual",
+text:"Best views or best overall trail?"
+},
+
+{
+style:"casual",
+text:"Is a hike better the second time when you know what to expect?"
+},
+
+{
+style:"casual",
+text:"What makes something an automatic favourite?"
 }
 
 ];
@@ -501,63 +601,88 @@ text:"Some trails probably stay favourites simply because they fit easily into a
 const holdPosts=[
 
 {
-type:"future",
-text:"There are probably quite a few Invermere-area hikes that are still sitting on people's future lists."
+style:"complete",
+text:"Some hikes around Invermere get recommended so often that it's easy to forget there are probably a bunch of others people quietly love just as much."
 },
 
 {
-type:"future",
-text:"Some trails seem to stay on a hiking list for a surprisingly long time before actually getting done."
+style:"complete",
+text:"A future hiking list around Invermere could get long pretty quickly, especially once the better-known trails are only the starting point."
 },
 
 {
-type:"future",
-text:"There are a lot of hiking areas around Invermere that could probably keep someone busy for years."
+style:"complete",
+text:"There are enough different hiking areas around Invermere that someone could probably keep finding new things to learn about without ever getting through everything."
 },
 
 {
-type:"future",
-text:"A future hiking list for the Invermere area could get pretty long without much effort."
+style:"complete",
+text:"Some trails seem to stay interesting simply because there are so many different reasons a person might want to do them."
 },
 
 {
-type:"future",
-text:"There are plenty of trails around Invermere that would be easy to keep in mind for another time."
+style:"complete",
+text:"The more hiking options there are around one area, the more likely it is that good trails exist outside the usual handful everyone talks about."
 },
 
 {
-type:"future",
-text:"Some hikes seem to be the kind that people keep meaning to get around to eventually."
+style:"complete",
+text:"A long hiking list isn't necessarily about collecting the biggest objectives. Some of the shorter or less obvious trails can be just as worth keeping in mind."
 },
 
 {
-type:"discussion",
-text:"A hiking list can get pretty ambitious when there are this many options around one area."
+style:"complete",
+text:"Some hikes probably become favourites because of the views, while others become favourites because they suit a certain kind of day. Both are worth having on a list."
 },
 
 {
-type:"discussion",
-text:"It's interesting how quickly a list of hikes can grow when there are always more trails to learn about."
+style:"complete",
+text:"There must be a few trails around Invermere that people hear about repeatedly before eventually deciding they're finally worth moving higher up the list."
 },
 
 {
-type:"discussion",
-text:"Some people seem to have a small group of favourites, while other people are always adding somewhere new to the list."
+style:"complete",
+text:"A good hiking list probably needs some variety. The biggest and most ambitious routes can't be the only things worth remembering."
 },
 
 {
-type:"discussion",
-text:"There are probably a lot of different ideas about what makes a hike worth putting on a future list."
+style:"complete",
+text:"There are enough hiking possibilities around Invermere that a person's future list could probably keep changing as they learn about new places."
 },
 
 {
-type:"casual",
-text:"The Invermere area has enough hiking options that there is probably no shortage of things to save for another day."
+style:"question",
+text:"There are some hikes that sound good for years before actually making it onto the calendar. Any around Invermere that have been sitting on your list for a while?"
 },
 
 {
-type:"casual",
-text:"It would be pretty easy to build a long hiking list around Invermere without even getting into the more ambitious routes."
+style:"question",
+text:"Some trails probably stay on a future list because there's always another hike that gets chosen first. Which ones have been waiting the longest?"
+},
+
+{
+style:"question",
+text:"There are probably a few hikes around Invermere that people keep meaning to learn more about. Any that come to mind?"
+},
+
+{
+style:"question",
+text:"A hiking list can get pretty ambitious when there are this many options around one area. What would be near the top of yours?"
+},
+
+{
+style:"casual",
+text:"One hike you've been meaning to do for ages?"
+},
+
+{
+style:"casual",
+text:"Big future objective or smaller hike you've been meaning to get around to?"
+},
+
+{
+style:"casual",
+text:"What keeps a hike on the list?"
 }
 
 ];
@@ -568,38 +693,64 @@ text:"It would be pretty easy to build a long hiking list around Invermere witho
    =========================================================
 
    Very conservative.
+   No encouragement of outdoor activity.
 */
 
 const blockPosts=[
 
 {
-type:"memory",
-text:"Hiking areas tend to leave people with a few trails they remember better than the rest."
+style:"complete",
+text:"A memorable hike isn't always the biggest or hardest one. Sometimes the trails people remember most are memorable for reasons that have nothing to do with difficulty."
 },
 
 {
-type:"memory",
-text:"Some trails stick in people's minds for reasons that have nothing to do with how difficult they were."
+style:"complete",
+text:"Different people can walk away from the same trail with completely different ideas about what made it worthwhile."
 },
 
 {
-type:"discussion",
-text:"A memorable hike isn't always the biggest or hardest one."
+style:"complete",
+text:"Scenery, effort and the overall feel of a trail can all matter, but they don't necessarily matter in the same order to everyone."
 },
 
 {
-type:"discussion",
-text:"Different people seem to value completely different things in a hiking trail."
+style:"complete",
+text:"Some trails probably stay in people's minds because of the destination, while others are remembered more for the experience of getting there."
 },
 
 {
-type:"discussion",
-text:"Sometimes the simplest hikes end up being the ones people remember."
+style:"complete",
+text:"The simplest hikes can sometimes leave just as much of an impression as the ambitious ones."
 },
 
 {
-type:"discussion",
-text:"Scenery, effort and the overall feel of a trail can all matter when deciding whether a hike was worthwhile."
+style:"complete",
+text:"What makes a hike memorable is probably more personal than a list of statistics can capture."
+},
+
+{
+style:"complete",
+text:"A favourite trail doesn't have to be the most difficult or dramatic one around. Sometimes it just has something that suits a person particularly well."
+},
+
+{
+style:"question",
+text:"Different people seem to value completely different things in a hiking trail. What usually stands out to you?"
+},
+
+{
+style:"question",
+text:"Some trails are remembered for the views and others for completely different reasons. What tends to make one stick in your mind?"
+},
+
+{
+style:"casual",
+text:"What makes a hike memorable?"
+},
+
+{
+style:"casual",
+text:"Views, challenge or the overall experience?"
 }
 
 ];
@@ -1287,59 +1438,123 @@ return copy;
 }
 
 
-function choosePosts(pool,count){
+function pickRandom(array){
 
-let shuffled=shuffle(pool);
+return array[
+Math.floor(
+Math.random()*array.length
+)
+];
+
+}
+
+
+/* =========================================================
+   CONTENT SELECTION
+   =========================================================
+
+   Weighted approximately:
+   50% complete thoughts
+   30% thought + natural question
+   20% casual discussion starters
+
+   For three recommendations, the engine deliberately
+   chooses two complete thoughts, then one post from either
+   the question or casual category using a 60/40 split.
+*/
+
+function choosePosts(pool){
+
+let complete=
+shuffle(
+pool.filter(p=>p.style==="complete")
+);
+
+let questions=
+shuffle(
+pool.filter(p=>p.style==="question")
+);
+
+let casual=
+shuffle(
+pool.filter(p=>p.style==="casual")
+);
+
 
 let selected=[];
 
-let usedTypes=[];
 
+/* Two complete thoughts */
 
-for(let post of shuffled){
+if(complete[0]){
 
-if(
-selected.length>=count
-) break;
-
-
-if(
-usedTypes.includes(post.type)&&
-selected.length<pool.length-1
-){
-
-continue;
+selected.push(complete[0]);
 
 }
 
+if(complete[1]){
+
+selected.push(complete[1]);
+
+}
+
+
+/* Third post:
+   60% question
+   40% casual
+*/
+
+let thirdPool=
+
+Math.random()<0.60
+?
+questions
+:
+casual;
+
+
+/* Fallback if chosen category is empty */
+
+if(!thirdPool.length){
+
+thirdPool=
+questions.length?
+questions:
+casual;
+
+}
+
+
+if(thirdPool[0]){
+
+selected.push(thirdPool[0]);
+
+}
+
+
+/* Safety fallback */
+
+if(selected.length<3){
+
+let remaining=
+shuffle(
+pool.filter(
+p=>!selected.includes(p)
+)
+);
+
+for(let post of remaining){
+
+if(selected.length>=3) break;
 
 selected.push(post);
 
-usedTypes.push(post.type);
-
-}
-
-
-if(selected.length<count){
-
-for(let post of shuffled){
-
-if(
-selected.length>=count
-) break;
-
-if(!selected.includes(post)){
-
-selected.push(post);
-
-}
-
 }
 
 }
 
 
-return selected;
+return shuffle(selected);
 
 }
 
@@ -1492,7 +1707,7 @@ getContentPool(level);
 
 
 let picks=
-choosePosts(pool,3);
+choosePosts(pool);
 
 
 let out=
@@ -1505,7 +1720,7 @@ let explanation;
 if(level==="CLEAR"){
 
 explanation=
-"Normal group content. These are casual hiking thoughts rather than direct engagement prompts.";
+"Normal group content. Complete thoughts are prioritised, with occasional natural questions and casual discussion starters.";
 
 }
 
