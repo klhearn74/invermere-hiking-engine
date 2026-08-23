@@ -192,8 +192,11 @@ async function checkFire(){
 fireState="CHECKING";
 
 const fireBox=document.getElementById("fire");
+
 fireBox.className="status hold";
-fireBox.textContent="CHECKING — Contacting official BC current-fire data…";
+
+fireBox.textContent=
+"CHECKING — Contacting official BC current-fire data…";
 
 const q=new URLSearchParams({
 where:"1=1",
@@ -218,82 +221,124 @@ if(!r.ok){
 throw new Error("HTTP "+r.status+" "+r.statusText);
 }
 
-const text=await r.text();
-
-let d;
-
-try{
-d=JSON.parse(text);
-}catch(parseError){
-throw new Error("BC fire service returned invalid JSON.");
-}
+const d=await r.json();
 
 if(d.error){
-throw new Error(
-d.error.message||"Unknown ArcGIS error"
-);
+throw new Error(d.error.message||"Unknown ArcGIS error");
 }
 
 if(!Array.isArray(d.features)){
-throw new Error(
-"BC fire service response did not contain a feature list."
-);
+throw new Error("BC fire service response did not contain a feature list.");
 }
 
-let found=[];
+
+/* Create a visible result for every area */
+
+let areaResults=regions.map(z=>({
+name:z[0],
+fires:[]
+}));
+
 
 for(let f of d.features){
 
 let a=f.attributes||{};
+
 let lat=Number(a.LATITUDE);
 let lng=Number(a.LONGITUDE);
 
 if(!Number.isFinite(lat)||!Number.isFinite(lng)) continue;
 
+
+/* Ignore fires officially marked out */
+
 let status=String(a.FIRE_STATUS||"").toLowerCase();
 
 if(status.includes("out")) continue;
 
-for(let z of regions){
+
+regions.forEach((z,index)=>{
 
 if(dist(z[1],z[2],lat,lng)<=z[3]){
 
-found.push(
-(a.INCIDENT_NAME||"Unnamed fire")+
-" — "+z[0]
+areaResults[index].fires.push(
+a.INCIDENT_NAME||"Unnamed fire"
 );
 
-break;
+}
+
+});
 
 }
 
-}
 
-}
+const affectedAreas=
+areaResults.filter(x=>x.fires.length>0);
 
-fireState=found.length?"HOLD":"CLEAR";
+fireState=
+affectedAreas.length?"HOLD":"CLEAR";
+
 
 fireBox.className=
 "status "+(fireState==="CLEAR"?"clear":"hold");
 
-fireBox.textContent=
-fireState==="CLEAR"
-?"CLEAR — No relevant active fires detected."
-:"HOLD — Relevant active fire(s) detected: "+found.join("; ");
+
+let html="<b>Areas checked:</b>";
+
+
+html+=areaResults.map(x=>{
+
+if(x.fires.length){
+
+return '<div class="region">⚠️ '+
+x.name+
+" — Relevant active fire detected: "+
+x.fires.join(", ")+
+"</div>";
+
+}
+
+return '<div class="region">✓ '+
+x.name+
+" — no relevant active fires detected"+
+"</div>";
+
+}).join("");
+
+
+if(fireState==="CLEAR"){
+
+html=
+"<b>CLEAR — No relevant active fires detected.</b><br><br>"+
+html;
+
+}else{
+
+html=
+"<b>HOLD — Relevant active fire(s) detected in one or more checked areas.</b><br><br>"+
+html;
+
+}
+
+
+fireBox.innerHTML=html;
+
 
 }catch(e){
 
 fireState="HOLD";
+
 fireBox.className="status hold";
 
 fireBox.textContent=
-"HOLD — FIRE DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+
+"HOLD — FIRE DATA CHECK FAILED. "+
+"Do not publish until manually reviewed. "+
+"Diagnostic: "+
 (e&&e.message?e.message:"Unknown error");
 
 }
 
 }
-
 
 /* =========================
    SMOKE WARNING REGIONS
@@ -359,27 +404,34 @@ local:false
 async function checkSmokeWarning(){
 
 smokeState="CHECKING";
+
 smokeRegionResults=[];
 
 const smokeBox=document.getElementById("smokeLive");
 
 smokeBox.className="status hold";
+
 smokeBox.textContent=
 "CHECKING — Contacting official current air-quality warning data…";
 
 try{
 
-/*
-Get current BC alerts first.
 
-We deliberately do NOT filter by zone_id.
-Instead we match the documented official
-feature_name_en field after receiving the data.
+/*
+IMPORTANT:
+
+This uses the official documented Environment Canada
+filter format: properties.province=BC
+
+We do not assume an empty result means CLEAR unless
+we successfully receive a valid feature collection.
 */
 
 const url=
-"https://api.weather.gc.ca/collections/weather-alerts/items?f=json&limit=1000&filter="+
-encodeURIComponent("province='BC'");
+"https://api.weather.gc.ca/collections/weather-alerts/items?"+
+"f=json&limit=1000&filter="+
+encodeURIComponent("properties.province=BC");
+
 
 const r=await fetch(url,{
 method:"GET",
@@ -387,21 +439,37 @@ mode:"cors",
 cache:"no-store"
 });
 
+
 if(!r.ok){
-throw new Error("HTTP "+r.status+" "+r.statusText);
+
+throw new Error(
+"HTTP "+r.status+" "+r.statusText
+);
+
 }
+
 
 const data=await r.json();
 
-if(!data||!Array.isArray(data.features)){
+
+if(
+!data||
+data.type!=="FeatureCollection"||
+!Array.isArray(data.features)
+){
+
 throw new Error(
-"Air-quality warning service returned an unexpected response."
+"Official warning service returned an unexpected response."
 );
+
 }
 
 
 /*
-Keep active air-quality alerts.
+Find active air-quality warnings.
+
+We use several official fields defensively because
+the wording can vary.
 */
 
 const airQualityAlerts=data.features.filter(feature=>{
@@ -417,49 +485,80 @@ String(p.alert_text_en||"").toLowerCase();
 const alertType=
 String(p.alert_type||"").toLowerCase();
 
+const riskColour=
+String(p.risk_colour_en||"").toLowerCase();
+
 const status=
 String(p.status_en||"").toLowerCase();
 
-const displayStatus=
-String(p.display_status||"").toLowerCase();
-
-const ended=
-status==="ended"||
-displayStatus==="ended";
+const isEnded=
+status.includes("ended");
 
 const isAirQuality=
 alertName.includes("air quality")||
-alertText.includes("wildfire smoke");
+alertText.includes("wildfire smoke")||
+alertText.includes("air quality");
 
-return !ended && isAirQuality && alertType==="warning";
+const isWarning=
+alertType==="warning"||
+riskColour==="yellow"||
+riskColour==="orange"||
+riskColour==="red";
+
+
+return !isEnded&&isAirQuality&&isWarning;
 
 });
 
 
 /*
-Match official alerts against each official region.
+Show what official region names the API actually returned.
+
+Instead of requiring an exact match immediately,
+we normalize dashes and spacing first.
 */
 
+function normalizeName(value){
+
+return String(value||"")
+.toLowerCase()
+.replace(/[–—]/g,"-")
+.replace(/\s+/g," ")
+.trim();
+
+}
+
+
 for(let region of smokeRegions){
+
+const target=normalizeName(region.name);
 
 const matches=airQualityAlerts.filter(feature=>{
 
 const p=feature.properties||{};
 
-const featureName=
-String(p.feature_name_en||"")
-.trim()
-.toLowerCase();
+const possibleNames=[
 
-return featureName===
-region.name.toLowerCase();
+p.feature_name_en,
+p.location_name_en,
+p.region_name_en
+
+]
+.map(normalizeName)
+.filter(Boolean);
+
+
+return possibleNames.includes(target);
 
 });
 
+
 smokeRegionResults.push({
+
 ...region,
 warning:matches.length>0,
 alerts:matches
+
 });
 
 }
@@ -468,16 +567,21 @@ alerts:matches
 const local=
 smokeRegionResults.find(r=>r.local);
 
+
 if(!local){
+
 throw new Error(
-"Could not identify Invermere's official warning area."
+"Could not identify Invermere's official forecast/warning area."
 );
+
 }
 
 
 /*
-Only Invermere's own official warning area
-controls the automatic local smoke safety state.
+SAFETY RULE:
+
+We only return CLEAR after a successful official check
+with a valid response and a completed region comparison.
 */
 
 smokeState=
@@ -495,53 +599,55 @@ let html="";
 
 if(local.warning){
 
-const firstAlert=local.alerts[0];
-const p=firstAlert.properties||{};
+const p=
+(local.alerts[0]||{}).properties||{};
 
-const impact=
-p.impact_en?
-" Impact: "+p.impact_en+"."
-:"";
+const impact=p.impact_en?
+" Impact: "+p.impact_en+".":
+"";
 
-html+=
-"<b>LOCAL WARNING:</b> An official air-quality warning is currently in effect for Invermere's official forecast/warning area."+impact+
 
-"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere — not “northeast Kootenay.”</span>";
+html=
+"<b>LOCAL WARNING:</b> An official air-quality warning is currently in effect for Invermere's official forecast/warning area."+
+impact+
+
+"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere. It does not mean northeast Kootenay.</span>";
 
 }else{
 
-html+=
-"<b>LOCAL AREA:</b> No official air-quality warning is currently detected for Invermere's official forecast/warning area."+ 
+html=
+"<b>LOCAL AREA:</b> No official air-quality warning was detected for Invermere's official forecast/warning area after a successful check of the current official BC alert data."+ 
 
 "<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere.</span>";
 
 }
 
 
-html+="<br><br><b>Nearby official regions:</b>";
+html+="<br><br><b>Official regions checked:</b>";
 
 
-html+=
-smokeRegionResults
-.filter(r=>!r.local)
-.map(r=>
-'<div class="region">'+
+html+=smokeRegionResults.map(r=>{
+
+return '<div class="region">'+
 (r.warning?"⚠️ ":"✓ ")+
 r.displayName+
 " — "+
 (r.warning?"official air-quality warning":"no air-quality warning detected")+
-"</div>"
-)
-.join("");
+"</div>";
+
+}).join("");
 
 
 const nearbyWarnings=
-smokeRegionResults.filter(r=>!r.local&&r.warning);
+smokeRegionResults.filter(
+r=>!r.local&&r.warning
+);
+
 
 if(nearbyWarnings.length){
 
 html+=
-"<br><span class='small'>Nearby warnings are shown for context only. A warning in another official region does not automatically mean Invermere's area has the same conditions.</span>";
+"<br><span class='small'>Warnings in nearby official regions are shown separately for context. They do not automatically mean Invermere's official area has the same conditions.</span>";
 
 }
 
@@ -551,18 +657,24 @@ smokeBox.innerHTML=html;
 
 }catch(e){
 
+/*
+If anything about the official check fails,
+we deliberately fail safe.
+*/
+
 smokeState="HOLD";
 
 smokeBox.className="status hold";
 
 smokeBox.textContent=
-"HOLD — SMOKE WARNING DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+
+"HOLD — SMOKE WARNING DATA CHECK FAILED. "+
+"Do not publish until manually reviewed. "+
+"Diagnostic: "+
 (e&&e.message?e.message:"Unknown error");
 
 }
 
 }
-
 
 /* =========================
    POST SELECTION
