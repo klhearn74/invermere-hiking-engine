@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Invermere Group Hiking — V2.1.1</title>
+<title>Invermere Group Hiking — V2.2</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
@@ -22,10 +22,12 @@ button{background:#2f6548;color:white;border:0;border-radius:8px;font-weight:bol
 
 <body>
 
-<h1>Invermere Group Hiking — Content Engine V2.1.1</h1>
+<h1>Invermere Group Hiking — Content Engine V2.2</h1>
+
 
 <section>
 <h2>🔥 Live wildfire check</h2>
+
 <p class="small">
 Checks official BC current-fire data.
 Relevant active fire or failed data check = HOLD.
@@ -35,6 +37,22 @@ Relevant active fire or failed data check = HOLD.
 
 <div id="fire" class="status hold">
 HOLD — Not checked yet. Run the live check first.
+</div>
+</section>
+
+
+<section>
+<h2>🌫️ Live smoke warning check</h2>
+
+<p class="small">
+Checks the official current air-quality warning for East Kootenay — north including Invermere.
+An active warning or failed data check = HOLD.
+</p>
+
+<button onclick="checkSmokeWarning()">Check current smoke warning</button>
+
+<div id="smokeLive" class="status hold">
+HOLD — Not checked yet. Run the live smoke warning check first.
 </div>
 </section>
 
@@ -115,13 +133,15 @@ HOLD — Not checked yet. Run the live check first.
 
 <section>
 <h2>Recommendations</h2>
-<div id="results">Run the wildfire check first.</div>
+<div id="results">Run both live safety checks first.</div>
 </section>
 
 
 <script>
 
 let fireState="UNCHECKED";
+let smokeState="UNCHECKED";
+
 
 const regions=[
 ["Invermere / Windermere",50.507,-116.024,25],
@@ -130,7 +150,9 @@ const regions=[
 ["Canal Flats",50.17,-115.85,25]
 ];
 
+
 const posts=[
+
 ["Connect people",
 "Anyone heading out for a hike around Invermere in the next little while and open to having someone join them? Feel free to post what day you’re going and what kind of hike you have in mind.",
 "hike"],
@@ -158,29 +180,29 @@ const posts=[
 ["Seasonal/off-season",
 "Off-season question: what’s one Invermere-area hike you keep thinking about doing again when the right season comes around?",
 "discussion"]
+
 ];
 
 
 function dist(a,b,c,d){
-let R=6371,
-p=Math.PI/180,
-x=Math.sin((c-a)*p/2)**2+
-Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2;
+
+let R=6371;
+let p=Math.PI/180;
+
+let x=
+Math.sin((c-a)*p/2)**2+
+Math.cos(a*p)*
+Math.cos(c*p)*
+Math.sin((d-b)*p/2)**2;
 
 return 2*R*Math.asin(Math.sqrt(x));
+
 }
 
 
-/*
-V2.1.1 FIRE CONNECTION
-
-The request is made directly to the official BC ArcGIS
-service. We keep the safety rule that ANY failed verification
-results in HOLD.
-
-The diagnostic information is now displayed so we can see
-what actually happened if the browser blocks the request.
-*/
+/* =========================
+   LIVE WILDFIRE CHECK
+   ========================= */
 
 async function checkFire(){
 
@@ -195,10 +217,12 @@ fireBox.textContent=
 
 
 const q=new URLSearchParams({
+
 where:"1=1",
 outFields:"*",
 returnGeometry:"false",
 f:"json"
+
 });
 
 
@@ -237,7 +261,7 @@ d=JSON.parse(text);
 }catch(parseError){
 
 throw new Error(
-"BC service returned a response that was not valid JSON."
+"BC fire service returned invalid JSON."
 );
 
 }
@@ -256,7 +280,7 @@ throw new Error(
 if(!Array.isArray(d.features)){
 
 throw new Error(
-"BC service response did not contain a feature list."
+"BC fire service response did not contain a feature list."
 );
 
 }
@@ -334,21 +358,187 @@ fireState="HOLD";
 fireBox.className="status hold";
 
 
-let reason=
-e&&e.message?
-e.message:
-"Unknown browser/network error";
-
-
 fireBox.textContent=
-"HOLD — DATA CHECK FAILED. "+
+"HOLD — FIRE DATA CHECK FAILED. "+
 "Do not publish until manually reviewed. "+
-"Diagnostic: "+reason;
+"Diagnostic: "+
+(e&&e.message?e.message:"Unknown error");
 
 }
 
 }
 
+
+/* =========================
+   LIVE SMOKE WARNING CHECK
+   ========================= */
+
+async function checkSmokeWarning(){
+
+smokeState="CHECKING";
+
+const smokeBox=
+document.getElementById("smokeLive");
+
+smokeBox.className="status hold";
+
+smokeBox.textContent=
+"CHECKING — Contacting official air-quality warning data…";
+
+
+/*
+Environment and Climate Change Canada provides
+machine-readable official weather/air-quality alerts.
+
+The BC wildfire smoke warnings are jointly issued
+by Environment Canada and the BC Ministry of
+Environment and Parks.
+
+We retrieve current BC alerts and then look specifically
+for the East Kootenay — north including Invermere area.
+*/
+
+
+const url=
+"https://api.weather.gc.ca/collections/weather-alerts/items?f=json&filter="+
+encodeURIComponent("properties.province='BC'");
+
+
+try{
+
+const r=await fetch(url,{
+method:"GET",
+mode:"cors",
+cache:"no-store"
+});
+
+
+if(!r.ok){
+
+throw new Error(
+"HTTP "+r.status+" "+r.statusText
+);
+
+}
+
+
+const data=await r.json();
+
+
+if(!data||!Array.isArray(data.features)){
+
+throw new Error(
+"Air-quality warning service returned an unexpected response."
+);
+
+}
+
+
+const relevantAlerts=
+data.features.filter(feature=>{
+
+const p=feature.properties||{};
+
+
+const name=
+String(p.feature_name_en||"").toLowerCase();
+
+
+const type=
+String(p.alert_type||"").toLowerCase();
+
+
+const alertName=
+String(p.alert_name_en||"").toLowerCase();
+
+
+const alertText=
+String(p.alert_text_en||"").toLowerCase();
+
+
+const isInvermereArea=
+name.includes("east kootenay") &&
+name.includes("invermere");
+
+
+const isAirQuality=
+type.includes("air") ||
+alertName.includes("air quality") ||
+alertText.includes("wildfire smoke") ||
+alertText.includes("air quality");
+
+
+const isActive=
+String(p.status_en||"").toLowerCase()!=="ended" &&
+String(p.display_status||"").toLowerCase()!=="ended";
+
+
+return isInvermereArea &&
+isAirQuality &&
+isActive;
+
+});
+
+
+smokeState=
+relevantAlerts.length?
+"HOLD":
+"CLEAR";
+
+
+smokeBox.className=
+"status "+
+(smokeState==="CLEAR"?"clear":"hold");
+
+
+if(smokeState==="CLEAR"){
+
+smokeBox.textContent=
+"CLEAR — No current official air-quality warning for East Kootenay — north including Invermere.";
+
+}else{
+
+const alert=
+relevantAlerts[0];
+
+const p=alert.properties||{};
+
+const warningName=
+p.alert_name_en||
+"Air-quality warning";
+
+const impact=
+p.impact_en?
+" Impact: "+p.impact_en+"."
+:"";
+
+smokeBox.textContent=
+"HOLD — Official air-quality warning currently in effect for East Kootenay — north including Invermere. "+
+warningName+"."+impact;
+
+}
+
+
+}catch(e){
+
+smokeState="HOLD";
+
+smokeBox.className="status hold";
+
+smokeBox.textContent=
+"HOLD — SMOKE WARNING DATA CHECK FAILED. "+
+"Do not publish until manually reviewed. "+
+"Diagnostic: "+
+(e&&e.message?e.message:"Unknown error");
+
+}
+
+}
+
+
+/* =========================
+   CONTENT ENGINE
+   ========================= */
 
 function run(){
 
@@ -359,8 +549,14 @@ w=weather.value,
 level="CLEAR";
 
 
+/*
+Both live checks must pass before content
+recommendations can be generated.
+*/
+
 if(
 fireState!=="CLEAR"||
+smokeState!=="CLEAR"||
 e==="ORDER"||
 s==="BLOCK"||
 a==="BLOCK"||
@@ -423,6 +619,7 @@ return;
 
 
 let filtered=posts.filter(p=>!(
+
 (
 e==="ALERT"||
 s==="CAUTION"
@@ -432,6 +629,7 @@ s==="CAUTION"
 p[2]==="hike"||
 p[2]==="conditions"
 )
+
 ));
 
 
@@ -440,6 +638,7 @@ let picks=filtered.slice(0,3);
 
 out.innerHTML=
 picks.map(p=>
+
 '<div class="post">'+
 '<b>'+p[0]+'</b><br><br>'+
 p[1]+
@@ -448,6 +647,7 @@ p[1]+
 JSON.stringify(p[1])+
 ')">Copy post</button>'+
 '</div>'
+
 ).join("");
 
 }
