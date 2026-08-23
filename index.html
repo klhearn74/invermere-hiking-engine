@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Invermere Group Hiking — V2.3</title>
+<title>Invermere Group Hiking — V2.3.1</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
@@ -22,31 +22,22 @@ button{background:#2f6548;color:white;border:0;border-radius:8px;font-weight:bol
 
 <body>
 
-<h1>Invermere Group Hiking — Content Engine V2.3</h1>
+<h1>Invermere Group Hiking — Content Engine V2.3.1</h1>
 
 <section>
 <h2>🔥 Live wildfire check</h2>
-
-<p class="small">
-Checks official BC current-fire data.
-Relevant active fire or failed data check = HOLD.
-</p>
-
+<p class="small">Checks official BC current-fire data. Relevant active fire or failed data check = HOLD.</p>
 <button onclick="checkFire()">Check current wildfire data</button>
-
-<div id="fire" class="status hold">
-HOLD — Not checked yet. Run the live check first.
-</div>
+<div id="fire" class="status hold">HOLD — Not checked yet. Run the live check first.</div>
 </section>
-
 
 <section>
 <h2>🌫️ Live smoke warning check</h2>
 
 <p class="small">
-Checks official Environment Canada air-quality warning regions around Invermere.
-The Invermere-area warning controls the local safety decision.
-Nearby regions are shown for additional context.
+Checks official air-quality warnings for Invermere's official forecast/warning area.
+Environment Canada calls this area “East Kootenay — north including Invermere.”
+Nearby official regions are shown separately for context.
 </p>
 
 <button onclick="checkSmokeWarning()">Check current smoke warnings</button>
@@ -55,7 +46,6 @@ Nearby regions are shown for additional context.
 HOLD — Not checked yet. Run the live smoke warning check first.
 </div>
 </section>
-
 
 <section>
 <h2>This week's context</h2>
@@ -90,7 +80,6 @@ HOLD — Not checked yet. Run the live smoke warning check first.
 </select>
 
 </section>
-
 
 <section>
 <h2>Manual Safety Gate</h2>
@@ -130,24 +119,16 @@ HOLD — Not checked yet. Run the live smoke warning check first.
 <div id="gate"></div>
 </section>
 
-
 <section>
 <h2>Recommendations</h2>
 <div id="results">Run both live safety checks first.</div>
 </section>
 
-
 <script>
 
 let fireState="UNCHECKED";
 let smokeState="UNCHECKED";
-
 let smokeRegionResults=[];
-
-
-/* =========================
-   OFFICIAL FIRE REGIONS
-   ========================= */
 
 const regions=[
 ["Invermere / Windermere",50.507,-116.024,25],
@@ -156,153 +137,74 @@ const regions=[
 ["Canal Flats",50.17,-115.85,25]
 ];
 
-
-/* =========================
-   NORMAL CONTENT
-   ========================= */
-
 const normalPosts=[
-
 "Anyone know some good shorter hikes around Invermere that are worth keeping on a list?",
-
 "Which hikes around Invermere have you ended up doing more than once?",
-
 "What trail around Invermere do you think is a little underrated?",
-
 "What's a hike around Invermere that you still haven't gotten around to doing?",
-
 "Which area around Invermere has the best variety of hikes in your opinion?",
-
 "What are some good hikes around Invermere for when you don't want to make a whole day of it?",
-
 "What's one trail around Invermere that you would happily do again?",
-
 "Are there any hikes around Invermere that you think are better than people give them credit for?",
-
 "What's a good hike around Invermere for someone who hasn't explored the area much?",
-
 "Which trail around Invermere has the best views without being an especially big day?",
-
 "What's a hike around Invermere that you remember being particularly nice?",
-
 "Which area around Invermere do you tend to go back to the most?"
 ];
 
-
-/* =========================
-   SAFETY-AWARE CONTENT
-   ========================= */
-
-/*
-These posts are deliberately different from normal
-activity-promoting posts.
-
-They do NOT:
-- claim current conditions
-- imply the poster is physically in Invermere
-- mention smoke unless necessary
-- encourage people to go hiking right now
-- use engagement-bait language
-*/
-
 const safetyAwarePosts=[
-
 "What are some good shorter hikes around Invermere to keep on a list?",
-
 "Which hikes around Invermere have you done more than once?",
-
 "What's a trail around Invermere that you think is underrated?",
-
 "What's a hike around Invermere that you still want to get around to?",
-
 "Which area around Invermere has some of your favourite trails?",
-
 "What's a hike around Invermere that you remember being especially scenic?",
-
 "Which trail around Invermere would you recommend keeping in mind for a future day out?",
-
 "What's a good hike around Invermere that doesn't require a huge time commitment?",
-
 "Are there any trails around Invermere that you think deserve more attention?",
-
 "What's one hike around Invermere that you'd like to do again someday?",
-
 "Which Invermere-area trail has surprised you in a good way?",
-
 "What are some good hikes around Invermere to keep on a future-hikes list?"
 ];
 
-
-/* =========================
-   VERY CONSERVATIVE CONTENT
-   ========================= */
-
 const seriousSafetyPosts=[
-
 "What's a hike around Invermere that you remember fondly?",
-
 "Which Invermere-area trail would you like to get back to someday?",
-
 "What's one trail around Invermere that has stuck in your memory?",
-
 "Which area around Invermere has some of your favourite hiking memories?",
-
 "What's a hike around Invermere that you would put on a future list?",
-
 "Are there any Invermere-area trails you've been meaning to learn more about?"
 ];
 
-
-/* =========================
-   DISTANCE CALCULATION
-   ========================= */
-
 function dist(a,b,c,d){
-
 let R=6371;
 let p=Math.PI/180;
-
 let x=
 Math.sin((c-a)*p/2)**2+
 Math.cos(a*p)*
 Math.cos(c*p)*
 Math.sin((d-b)*p/2)**2;
-
 return 2*R*Math.asin(Math.sqrt(x));
-
 }
-
-
-/* =========================
-   FIRE CHECK
-   ========================= */
 
 async function checkFire(){
 
 fireState="CHECKING";
 
 const fireBox=document.getElementById("fire");
-
 fireBox.className="status hold";
-
-fireBox.textContent=
-"CHECKING — Contacting official BC current-fire data…";
-
+fireBox.textContent="CHECKING — Contacting official BC current-fire data…";
 
 const q=new URLSearchParams({
-
 where:"1=1",
 outFields:"*",
 returnGeometry:"false",
 f:"json"
-
 });
-
 
 const url=
 "https://delivery.maps.gov.bc.ca/arcgis/rest/services/mpcm/bcgwpub/MapServer/502/query?"+
 q.toString();
-
 
 try{
 
@@ -312,81 +214,49 @@ mode:"cors",
 cache:"no-store"
 });
 
-
 if(!r.ok){
-
-throw new Error(
-"HTTP "+r.status+" "+r.statusText
-);
-
+throw new Error("HTTP "+r.status+" "+r.statusText);
 }
 
-
 const text=await r.text();
-
 
 let d;
 
 try{
-
 d=JSON.parse(text);
-
 }catch(parseError){
-
-throw new Error(
-"BC fire service returned invalid JSON."
-);
-
+throw new Error("BC fire service returned invalid JSON.");
 }
-
 
 if(d.error){
-
 throw new Error(
-"d.error: "+
-(d.error.message||"Unknown ArcGIS error")
+d.error.message||"Unknown ArcGIS error"
 );
-
 }
 
-
 if(!Array.isArray(d.features)){
-
 throw new Error(
 "BC fire service response did not contain a feature list."
 );
-
 }
 
-
 let found=[];
-
 
 for(let f of d.features){
 
 let a=f.attributes||{};
-
 let lat=Number(a.LATITUDE);
 let lng=Number(a.LONGITUDE);
 
+if(!Number.isFinite(lat)||!Number.isFinite(lng)) continue;
 
-if(!Number.isFinite(lat)||!Number.isFinite(lng))
-continue;
+let status=String(a.FIRE_STATUS||"").toLowerCase();
 
-
-let status=
-String(a.FIRE_STATUS||"").toLowerCase();
-
-
-if(status.includes("out"))
-continue;
-
+if(status.includes("out")) continue;
 
 for(let z of regions){
 
-if(
-dist(z[1],z[2],lat,lng)<=z[3]
-){
+if(dist(z[1],z[2],lat,lng)<=z[3]){
 
 found.push(
 (a.INCIDENT_NAME||"Unnamed fire")+
@@ -401,39 +271,23 @@ break;
 
 }
 
-
 fireState=found.length?"HOLD":"CLEAR";
 
-
 fireBox.className=
-"status "+
-(fireState==="CLEAR"?"clear":"hold");
-
-
-if(fireState==="CLEAR"){
+"status "+(fireState==="CLEAR"?"clear":"hold");
 
 fireBox.textContent=
-"CLEAR — No relevant active fires detected.";
-
-}else{
-
-fireBox.textContent=
-"HOLD — Relevant active fire(s) detected: "+
-found.join("; ");
-
-}
-
+fireState==="CLEAR"
+?"CLEAR — No relevant active fires detected."
+:"HOLD — Relevant active fire(s) detected: "+found.join("; ");
 
 }catch(e){
 
 fireState="HOLD";
-
 fireBox.className="status hold";
 
 fireBox.textContent=
-"HOLD — FIRE DATA CHECK FAILED. "+
-"Do not publish until manually reviewed. "+
-"Diagnostic: "+
+"HOLD — FIRE DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+
 (e&&e.message?e.message:"Unknown error");
 
 }
@@ -442,86 +296,90 @@ fireBox.textContent=
 
 
 /* =========================
-   SMOKE WARNING CHECK
+   SMOKE WARNING REGIONS
    ========================= */
-
-/*
-Official Environment Canada forecast/warning regions
-used for context around Invermere.
-
-084520 = East Kootenay north including Invermere
-084510 = East Kootenay south including Cranbrook
-084600 = Elk Valley
-084400 = Kootenay Lake
-084300 = West Kootenay
-085500 = East Columbia
-085400 = West Columbia
-085600 = Yoho Park - Kootenay Park
-*/
 
 const smokeRegions=[
 
 {
-code:"084520",
-name:"East Kootenay — north including Invermere",
+name:"East Kootenay - north including Invermere",
+displayName:"Invermere's official forecast/warning area",
 local:true
 },
 
 {
-code:"084510",
-name:"East Kootenay — south including Cranbrook",
+name:"East Kootenay - south including Cranbrook",
+displayName:"East Kootenay south / Cranbrook area",
 local:false
 },
 
 {
-code:"084600",
 name:"Elk Valley",
+displayName:"Elk Valley",
 local:false
 },
 
 {
-code:"084400",
 name:"Kootenay Lake",
+displayName:"Kootenay Lake",
 local:false
 },
 
 {
-code:"084300",
 name:"West Kootenay",
+displayName:"West Kootenay",
 local:false
 },
 
 {
-code:"085500",
 name:"East Columbia",
+displayName:"East Columbia",
 local:false
 },
 
 {
-code:"085400",
 name:"West Columbia",
+displayName:"West Columbia",
 local:false
 },
 
 {
-code:"085600",
-name:"Yoho Park — Kootenay Park",
+name:"Yoho Park - Kootenay Park",
+displayName:"Yoho / Kootenay Park",
 local:false
 }
 
 ];
 
 
-async function getSmokeRegion(region){
+/* =========================
+   SMOKE WARNING CHECK
+   ========================= */
+
+async function checkSmokeWarning(){
+
+smokeState="CHECKING";
+smokeRegionResults=[];
+
+const smokeBox=document.getElementById("smokeLive");
+
+smokeBox.className="status hold";
+smokeBox.textContent=
+"CHECKING — Contacting official current air-quality warning data…";
+
+try{
+
+/*
+Get current BC alerts first.
+
+We deliberately do NOT filter by zone_id.
+Instead we match the documented official
+feature_name_en field after receiving the data.
+*/
 
 const url=
-"https://api.weather.gc.ca/collections/weather-alerts/items?f=json&filter="+
-encodeURIComponent(
-"properties.province='BC' AND "+
-"properties.alert_type='warning' AND "+
-"properties.zone_id='"+region.code+"'"
-);
-
+"https://api.weather.gc.ca/collections/weather-alerts/items?f=json&limit=1000&filter="+
+encodeURIComponent("province='BC'");
 
 const r=await fetch(url,{
 method:"GET",
@@ -529,86 +387,79 @@ mode:"cors",
 cache:"no-store"
 });
 
-
 if(!r.ok){
-
-throw new Error(
-"HTTP "+r.status+" "+r.statusText
-);
-
+throw new Error("HTTP "+r.status+" "+r.statusText);
 }
-
 
 const data=await r.json();
 
-
 if(!data||!Array.isArray(data.features)){
-
 throw new Error(
-"Unexpected warning-service response."
+"Air-quality warning service returned an unexpected response."
 );
-
 }
 
 
-const active=data.features.filter(feature=>{
+/*
+Keep active air-quality alerts.
+*/
+
+const airQualityAlerts=data.features.filter(feature=>{
 
 const p=feature.properties||{};
 
-const name=
+const alertName=
 String(p.alert_name_en||"").toLowerCase();
 
-const type=
+const alertText=
+String(p.alert_text_en||"").toLowerCase();
+
+const alertType=
 String(p.alert_type||"").toLowerCase();
 
 const status=
 String(p.status_en||"").toLowerCase();
 
-const isAirQuality=
-name.includes("air quality") ||
-String(p.alert_text_en||"").toLowerCase().includes("wildfire smoke");
+const displayStatus=
+String(p.display_status||"").toLowerCase();
 
 const ended=
-status==="ended";
+status==="ended"||
+displayStatus==="ended";
 
-return isAirQuality && !ended && type==="warning";
+const isAirQuality=
+alertName.includes("air quality")||
+alertText.includes("wildfire smoke");
+
+return !ended && isAirQuality && alertType==="warning";
 
 });
 
 
-return active;
-
-}
-
-
-async function checkSmokeWarning(){
-
-smokeState="CHECKING";
-
-smokeRegionResults=[];
-
-const smokeBox=
-document.getElementById("smokeLive");
-
-smokeBox.className="status hold";
-
-smokeBox.textContent=
-"CHECKING — Checking official warning regions around Invermere…";
-
-
-try{
+/*
+Match official alerts against each official region.
+*/
 
 for(let region of smokeRegions){
 
-let alerts=
-await getSmokeRegion(region);
+const matches=airQualityAlerts.filter(feature=>{
+
+const p=feature.properties||{};
+
+const featureName=
+String(p.feature_name_en||"")
+.trim()
+.toLowerCase();
+
+return featureName===
+region.name.toLowerCase();
+
+});
 
 smokeRegionResults.push({
-
 ...region,
-warning:alerts.length>0,
-alerts:alerts
-
+warning:matches.length>0,
+alerts:matches
 });
 
 }
@@ -617,27 +468,16 @@ alerts:alerts
 const local=
 smokeRegionResults.find(r=>r.local);
 
-
-const nearby=
-smokeRegionResults.filter(r=>!r.local && r.warning);
-
-
 if(!local){
-
 throw new Error(
-"Could not identify the Invermere warning region."
+"Could not identify Invermere's official warning area."
 );
-
 }
 
 
 /*
-The local Invermere-area warning controls the
-actual safety state.
-
-Nearby warnings are displayed as context but
-do not automatically mean Invermere itself
-has a warning.
+Only Invermere's own official warning area
+controls the automatic local smoke safety state.
 */
 
 smokeState=
@@ -647,8 +487,7 @@ local.warning?
 
 
 smokeBox.className=
-"status "+
-(smokeState==="CLEAR"?"clear":"hold");
+"status "+(smokeState==="CLEAR"?"clear":"hold");
 
 
 let html="";
@@ -656,42 +495,53 @@ let html="";
 
 if(local.warning){
 
+const firstAlert=local.alerts[0];
+const p=firstAlert.properties||{};
+
+const impact=
+p.impact_en?
+" Impact: "+p.impact_en+"."
+:"";
+
 html+=
-"<b>LOCAL WARNING:</b> Official air-quality warning currently affects East Kootenay — north including Invermere.";
+"<b>LOCAL WARNING:</b> An official air-quality warning is currently in effect for Invermere's official forecast/warning area."+impact+
+
+"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere — not “northeast Kootenay.”</span>";
 
 }else{
 
 html+=
-"<b>LOCAL AREA:</b> No official air-quality warning currently detected for East Kootenay — north including Invermere.";
+"<b>LOCAL AREA:</b> No official air-quality warning is currently detected for Invermere's official forecast/warning area."+ 
+
+"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere.</span>";
 
 }
 
 
+html+="<br><br><b>Nearby official regions:</b>";
+
+
 html+=
-"<br><br><b>Nearby warning regions:</b>";
-
-
-const nearbyNames=
 smokeRegionResults
 .filter(r=>!r.local)
 .map(r=>
 '<div class="region">'+
 (r.warning?"⚠️ ":"✓ ")+
-r.name+
+r.displayName+
 " — "+
-(r.warning?"WARNING":"no air-quality warning detected")+
+(r.warning?"official air-quality warning":"no air-quality warning detected")+
 "</div>"
 )
 .join("");
 
 
-html+=nearbyNames;
+const nearbyWarnings=
+smokeRegionResults.filter(r=>!r.local&&r.warning);
 
-
-if(nearby.length){
+if(nearbyWarnings.length){
 
 html+=
-"<br><span class='small'>Nearby warnings are shown for context only. They do not automatically mean the Invermere area has the same conditions.</span>";
+"<br><span class='small'>Nearby warnings are shown for context only. A warning in another official region does not automatically mean Invermere's area has the same conditions.</span>";
 
 }
 
@@ -706,9 +556,7 @@ smokeState="HOLD";
 smokeBox.className="status hold";
 
 smokeBox.textContent=
-"HOLD — SMOKE WARNING DATA CHECK FAILED. "+
-"Do not publish until manually reviewed. "+
-"Diagnostic: "+
+"HOLD — SMOKE WARNING DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+
 (e&&e.message?e.message:"Unknown error");
 
 }
@@ -723,16 +571,14 @@ smokeBox.textContent=
 function choosePosts(pool,count){
 
 let copy=[...pool];
-
 let selected=[];
 
-while(copy.length && selected.length<count){
+while(copy.length&&selected.length<count){
 
 let index=
 Math.floor(Math.random()*copy.length);
 
 selected.push(copy[index]);
-
 copy.splice(index,1);
 
 }
@@ -755,11 +601,6 @@ let w=weather.value;
 
 let level="CLEAR";
 
-
-/*
-SERIOUS BLOCK
-*/
-
 if(
 e==="ORDER"||
 s==="BLOCK"||
@@ -770,11 +611,6 @@ w==="BLOCK"
 level="BLOCK";
 
 }
-
-
-/*
-HOLD / SAFETY-AWARE MODE
-*/
 
 else if(
 fireState!=="CLEAR"||
@@ -790,24 +626,15 @@ level="HOLD";
 
 }
 
-
-/*
-CLEAR / NORMAL MODE
-*/
-
 else{
 
 level="CLEAR";
 
 }
 
-
 let g=document.getElementById("gate");
 
-g.className=
-"status "+
-level.toLowerCase();
-
+g.className="status "+level.toLowerCase();
 
 if(level==="CLEAR"){
 
@@ -815,12 +642,14 @@ g.textContent=
 "CLEAR — Normal content mode. Safety checks passed.";
 
 }
+
 else if(level==="HOLD"){
 
 g.textContent=
 "HOLD — Safety-aware content mode. Hiking activity should not be encouraged right now.";
 
 }
+
 else{
 
 g.textContent=
@@ -831,41 +660,28 @@ g.textContent=
 
 let out=document.getElementById("results");
 
-
 let pool;
 
-
 if(level==="CLEAR"){
-
 pool=normalPosts;
-
 }
 else if(level==="HOLD"){
-
 pool=safetyAwarePosts;
-
 }
 else{
-
 pool=seriousSafetyPosts;
-
 }
 
-
-let picks=
-choosePosts(pool,3);
-
+let picks=choosePosts(pool,3);
 
 out.innerHTML=
 "<p class='small'>"+
 (
 level==="CLEAR"
-?
-"These are normal group posts."
+?"These are normal group posts."
 :
 level==="HOLD"
-?
-"These posts are intentionally written so they do not encourage current hiking activity or make claims about current Invermere conditions."
+?"These posts are intentionally written so they do not encourage current hiking activity or make claims about current Invermere conditions."
 :
 "These are very conservative posts that avoid encouraging outdoor activity."
 )+
