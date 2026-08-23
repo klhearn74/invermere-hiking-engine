@@ -2,27 +2,85 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Invermere Group Hiking — V2.3.3</title>
+<title>Invermere Group Hiking — V2.4</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
-body{font-family:Arial,sans-serif;max-width:1000px;margin:auto;padding:20px;background:#f5f4ef;color:#20231f}
-section{background:white;padding:18px;margin:14px 0;border:1px solid #ddd;border-radius:12px}
-select,button{padding:10px;margin:5px;width:100%;font-size:15px}
-button{background:#2f6548;color:white;border:0;border-radius:8px;font-weight:bold}
-.status{padding:12px;border-radius:8px;margin-top:10px}
-.clear{background:#e8f5ec}
-.hold{background:#fff4d9}
-.block{background:#fde7e7}
-.post{white-space:pre-wrap;border:1px solid #ddd;padding:14px;border-radius:8px;margin:12px 0}
-.small{color:#666;font-size:13px}
-.region{padding:8px;margin:5px 0;border-radius:6px;background:#f5f5f5}
+body{
+font-family:Arial,sans-serif;
+max-width:1000px;
+margin:auto;
+padding:20px;
+background:#f5f4ef;
+color:#20231f
+}
+
+section{
+background:white;
+padding:18px;
+margin:14px 0;
+border:1px solid #ddd;
+border-radius:12px
+}
+
+select,button{
+padding:10px;
+margin:5px;
+width:100%;
+font-size:15px
+}
+
+button{
+background:#2f6548;
+color:white;
+border:0;
+border-radius:8px;
+font-weight:bold
+}
+
+.status{
+padding:12px;
+border-radius:8px;
+margin-top:10px
+}
+
+.clear{
+background:#e8f5ec
+}
+
+.hold{
+background:#fff4d9
+}
+
+.block{
+background:#fde7e7
+}
+
+.post{
+white-space:pre-wrap;
+border:1px solid #ddd;
+padding:14px;
+border-radius:8px;
+margin:12px 0
+}
+
+.small{
+color:#666;
+font-size:13px
+}
+
+.region{
+padding:8px;
+margin:5px 0;
+border-radius:6px;
+background:#f5f5f5
+}
 </style>
 </head>
 
 <body>
 
-<h1>Invermere Group Hiking — Content Engine V2.3.3</h1>
+<h1>Invermere Group Hiking — Content Engine V2.4</h1>
 
 
 <section>
@@ -52,7 +110,6 @@ HOLD — Not checked yet. Run the live check first.
 
 <p class="small">
 Checks official air-quality warnings for Invermere's official forecast/warning area.
-Environment Canada calls this area “East Kootenay — north including Invermere.”
 Nearby official regions are shown separately for context.
 </p>
 
@@ -113,7 +170,6 @@ HOLD — Not checked yet. Run the live smoke warning check first.
 <section>
 
 <h2>Manual Safety Gate</h2>
-
 
 <label>🚨 Evacuation</label>
 
@@ -177,7 +233,7 @@ Run both live safety checks first.
 
 
 /* =========================================================
-   GLOBAL STATE
+   STATE
    ========================================================= */
 
 let fireState="UNCHECKED";
@@ -186,17 +242,8 @@ let smokeRegionResults=[];
 
 
 /* =========================================================
-   WILDFIRE CHECK AREAS
-   =========================================================
-
-   These are deliberately separate hiking-area checks.
-   They are not official administrative boundaries.
-
-   The coordinates represent the approximate centre of
-   each hiking area and the radius defines how far around
-   that centre the engine will look for active fires.
-*/
-
+   WILDFIRE AREAS
+   ========================================================= */
 
 const regions=[
 
@@ -221,93 +268,297 @@ const regions=[
 
 /* =========================================================
    NORMAL CONTENT
-   ========================================================= */
+   =========================================================
+
+   These are intentionally conversational.
+   They are NOT written like engagement prompts.
+*/
 
 const normalPosts=[
 
-"Anyone know some good shorter hikes around Invermere that are worth keeping on a list?",
+{
+type:"hiking",
+text:"I've been thinking about some of the hikes around Invermere that are worth doing more than once. Which ones have actually stayed favourites for you?"
+},
 
-"Which hikes around Invermere have you ended up doing more than once?",
+{
+type:"hiking",
+text:"What's a hike around Invermere that you remember being especially nice?"
+},
 
-"What trail around Invermere do you think is a little underrated?",
+{
+type:"hiking",
+text:"Which area around Invermere has some of your favourite trails?"
+},
 
-"What's a hike around Invermere that you still haven't gotten around to doing?",
+{
+type:"hiking",
+text:"What's a trail around Invermere that you think doesn't get enough attention?"
+},
 
-"Which area around Invermere has the best variety of hikes in your opinion?",
+{
+type:"hiking",
+text:"Are there any shorter hikes around Invermere that you really like?"
+},
 
-"What are some good hikes around Invermere for when you don't want to make a whole day of it?",
+{
+type:"hiking",
+text:"What's a hike around Invermere that you keep meaning to get back to?"
+},
 
-"What's one trail around Invermere that you would happily do again?",
+{
+type:"hiking",
+text:"Which Invermere-area trail have you ended up doing more than once?"
+},
 
-"Are there any hikes around Invermere that you think are better than people give them credit for?",
+{
+type:"hiking",
+text:"What's one hike around Invermere you'd recommend keeping on a list?"
+},
 
-"What's a good hike around Invermere for someone who hasn't explored the area much?",
+{
+type:"discussion",
+text:"I'm always curious which hikes people end up returning to instead of constantly looking for somewhere new. What are yours around Invermere?"
+},
 
-"Which trail around Invermere has the best views without being an especially big day?",
+{
+type:"discussion",
+text:"What's one trail around Invermere that surprised you in a good way?"
+},
 
-"What's a hike around Invermere that you remember being particularly nice?",
+{
+type:"discussion",
+text:"Do you tend to stick with a few favourite hikes around Invermere, or do you usually try somewhere different?"
+},
 
-"Which area around Invermere do you tend to go back to the most?"
+{
+type:"discussion",
+text:"What's an Invermere-area hike you remember mostly for the scenery?"
+}
 
 ];
 
 
 /* =========================================================
-   SAFETY-AWARE CONTENT
+   QUIET GROUP CONTENT
+   =========================================================
+
+   These are deliberately lower-pressure.
+*/
+
+const quietPosts=[
+
+{
+type:"local",
+text:"I've been thinking about the different hiking areas around Invermere. Which area do you usually end up going back to?"
+},
+
+{
+type:"local",
+text:"What's one Invermere-area trail that has stuck in your memory?"
+},
+
+{
+type:"local",
+text:"Which hike around Invermere would you happily do again?"
+},
+
+{
+type:"local",
+text:"What's a good shorter hike around Invermere that you like?"
+},
+
+{
+type:"local",
+text:"Are there any trails around Invermere that you think are underrated?"
+},
+
+{
+type:"local",
+text:"Which part of the valley do you think has the best selection of hikes?"
+},
+
+{
+type:"discussion",
+text:"Do you usually have a few favourite hikes you return to, or are you more of a try-somewhere-new person?"
+},
+
+{
+type:"discussion",
+text:"What's a hike you've done around Invermere that you still think about?"
+}
+
+];
+
+
+/* =========================================================
+   ACTIVE GROUP CONTENT
    ========================================================= */
 
-const safetyAwarePosts=[
+const activePosts=[
 
-"What are some good shorter hikes around Invermere to keep on a list?",
+{
+type:"hiking",
+text:"Which Invermere-area hikes have people been enjoying enough to go back to more than once?"
+},
 
-"Which hikes around Invermere have you done more than once?",
+{
+type:"hiking",
+text:"What's your favourite hike around Invermere when you don't want to make it a huge day?"
+},
 
-"What's a trail around Invermere that you think is underrated?",
+{
+type:"hiking",
+text:"Which trail around Invermere would you recommend to someone who knows the area reasonably well but still has lots left to explore?"
+},
 
-"What's a hike around Invermere that you still want to get around to?",
+{
+type:"hiking",
+text:"What's one Invermere-area trail you'd put near the top of a hiking list?"
+},
 
-"Which area around Invermere has some of your favourite trails?",
+{
+type:"local",
+text:"Which hiking area around Invermere do you think has the most variety?"
+},
 
-"What's a hike around Invermere that you remember being especially scenic?",
+{
+type:"local",
+text:"What's a trail around Invermere that you think people sometimes overlook?"
+},
 
-"Which trail around Invermere would you recommend keeping in mind for a future day out?",
+{
+type:"discussion",
+text:"I'm curious which hikes people keep coming back to around Invermere. There must be a few that never get old."
+},
 
-"What's a good hike around Invermere that doesn't require a huge time commitment?",
-
-"Are there any trails around Invermere that you think deserve more attention?",
-
-"What's one hike around Invermere that you'd like to do again someday?",
-
-"Which Invermere-area trail has surprised you in a good way?",
-
-"What are some good hikes around Invermere to keep on a future-hikes list?"
-
-];
-
-
-/* =========================================================
-   VERY CONSERVATIVE CONTENT
-   ========================================================= */
-
-const seriousSafetyPosts=[
-
-"What's a hike around Invermere that you remember fondly?",
-
-"Which Invermere-area trail would you like to get back to someday?",
-
-"What's one trail around Invermere that has stuck in your memory?",
-
-"Which area around Invermere has some of your favourite hiking memories?",
-
-"What's a hike around Invermere that you would put on a future list?",
-
-"Are there any Invermere-area trails you've been meaning to learn more about?"
+{
+type:"discussion",
+text:"What's one trail around Invermere that you think deserves another visit?"
+}
 
 ];
 
 
 /* =========================================================
-   DISTANCE CALCULATION
+   HOLD CONTENT
+   =========================================================
+
+   IMPORTANT:
+   These do NOT mention current conditions.
+   They do NOT imply the poster is physically in Invermere.
+   They do NOT encourage anyone to go hiking now.
+*/
+
+const holdPosts=[
+
+{
+type:"future",
+text:"What's a hike around Invermere that you'd like to do again sometime?"
+},
+
+{
+type:"future",
+text:"Which Invermere-area trails are on your future hiking list?"
+},
+
+{
+type:"future",
+text:"What's one hike around Invermere you've been meaning to get around to?"
+},
+
+{
+type:"future",
+text:"Which hiking area around Invermere would you like to explore more?"
+},
+
+{
+type:"future",
+text:"What's a trail around Invermere that you'd happily put on a future list?"
+},
+
+{
+type:"future",
+text:"Are there any Invermere-area hikes you've heard good things about but haven't done yet?"
+},
+
+{
+type:"future",
+text:"What's one hike around Invermere that you'd like to repeat someday?"
+},
+
+{
+type:"future",
+text:"Which Invermere-area trail would you most like to learn more about?"
+},
+
+{
+type:"discussion",
+text:"Do you tend to keep a list of hikes you want to do, or just decide as you go?"
+},
+
+{
+type:"discussion",
+text:"What's usually the first thing that makes you want to try a particular hike?"
+},
+
+{
+type:"discussion",
+text:"What makes a hike worth doing again for you?"
+},
+
+{
+type:"discussion",
+text:"Do you usually prefer a shorter hike with good scenery or a longer day out?"
+}
+
+];
+
+
+/* =========================================================
+   BLOCK CONTENT
+   =========================================================
+
+   Very conservative.
+*/
+
+const blockPosts=[
+
+{
+type:"memory",
+text:"What's a hike around Invermere that you remember particularly well?"
+},
+
+{
+type:"memory",
+text:"Which Invermere-area trail has stayed in your memory?"
+},
+
+{
+type:"memory",
+text:"What's one hike you've done around Invermere that you'd like to talk about again?"
+},
+
+{
+type:"discussion",
+text:"What do you usually look for when choosing a hike?"
+},
+
+{
+type:"discussion",
+text:"Do you tend to prefer shorter hikes or longer days?"
+},
+
+{
+type:"discussion",
+text:"What makes a trail memorable for you?"
+}
+
+];
+
+
+/* =========================================================
+   DISTANCE
    ========================================================= */
 
 function dist(a,b,c,d){
@@ -363,7 +614,6 @@ q.toString();
 
 try{
 
-
 const r=await fetch(url,{
 
 method:"GET",
@@ -406,10 +656,6 @@ throw new Error(
 }
 
 
-/*
-Create a visible result for EVERY area.
-*/
-
 let areaResults=regions.map(z=>({
 
 name:z[0],
@@ -418,10 +664,6 @@ fires:[]
 
 }));
 
-
-/*
-Check every current fire against every hiking area.
-*/
 
 for(let f of d.features){
 
@@ -440,15 +682,10 @@ continue;
 }
 
 
-/*
-Only ignore fires whose official status is OUT.
-
-New, Out of Control, Being Held and Under Control
-are all still relevant enough to be visible to us.
-*/
-
 let status=
-String(a.FIRE_STATUS||"").trim().toLowerCase();
+String(a.FIRE_STATUS||"")
+.trim()
+.toLowerCase();
 
 
 if(status==="out"){
@@ -457,10 +694,6 @@ continue;
 
 }
 
-
-/*
-Check this fire against every hiking area.
-*/
 
 regions.forEach((z,index)=>{
 
@@ -476,7 +709,8 @@ status:a.FIRE_STATUS||"Status unknown",
 
 size:a.CURRENT_SIZE,
 
-description:a.GEOGRAPHIC_DESCRIPTION||""
+description:
+a.GEOGRAPHIC_DESCRIPTION||""
 
 });
 
@@ -486,10 +720,6 @@ description:a.GEOGRAPHIC_DESCRIPTION||""
 
 }
 
-
-/*
-Determine whether any area contains a relevant fire.
-*/
 
 const affectedAreas=
 areaResults.filter(
@@ -513,10 +743,6 @@ fireState==="CLEAR"
 "hold"
 );
 
-
-/*
-Build visible area-by-area results.
-*/
 
 let html="";
 
@@ -601,14 +827,6 @@ fireBox.innerHTML=html;
 
 }catch(e){
 
-
-/*
-FAIL SAFE:
-
-If the official fire service cannot be verified,
-the engine must NOT say CLEAR.
-*/
-
 fireState="HOLD";
 
 fireBox.className="status hold";
@@ -627,80 +845,56 @@ e.message:
 
 
 /* =========================================================
-   OFFICIAL SMOKE WARNING REGIONS
+   SMOKE WARNING REGIONS
    ========================================================= */
 
 const smokeRegions=[
 
 {
 name:"East Kootenay - north including Invermere",
-
-displayName:
-"Invermere's official forecast/warning area",
-
+displayName:"Invermere's official forecast/warning area",
 local:true
 },
 
 {
 name:"East Kootenay - south including Cranbrook",
-
-displayName:
-"East Kootenay south / Cranbrook area",
-
+displayName:"East Kootenay south / Cranbrook area",
 local:false
 },
 
 {
 name:"Elk Valley",
-
-displayName:
-"Elk Valley",
-
+displayName:"Elk Valley",
 local:false
 },
 
 {
 name:"Kootenay Lake",
-
-displayName:
-"Kootenay Lake",
-
+displayName:"Kootenay Lake",
 local:false
 },
 
 {
 name:"West Kootenay",
-
-displayName:
-"West Kootenay",
-
+displayName:"West Kootenay",
 local:false
 },
 
 {
 name:"East Columbia",
-
-displayName:
-"East Columbia",
-
+displayName:"East Columbia",
 local:false
 },
 
 {
 name:"West Columbia",
-
-displayName:
-"West Columbia",
-
+displayName:"West Columbia",
 local:false
 },
 
 {
 name:"Yoho Park - Kootenay Park",
-
-displayName:
-"Yoho / Kootenay Park",
-
+displayName:"Yoho / Kootenay Park",
 local:false
 }
 
@@ -708,7 +902,7 @@ local:false
 
 
 /* =========================================================
-   SMOKE WARNING CHECK
+   SMOKE CHECK
    ========================================================= */
 
 async function checkSmokeWarning(){
@@ -720,7 +914,6 @@ smokeRegionResults=[];
 const smokeBox=
 document.getElementById("smokeLive");
 
-
 smokeBox.className="status hold";
 
 smokeBox.textContent=
@@ -728,7 +921,6 @@ smokeBox.textContent=
 
 
 try{
-
 
 const url=
 "https://api.weather.gc.ca/collections/weather-alerts/items?"+
@@ -774,62 +966,49 @@ throw new Error(
 }
 
 
-/*
-Find active air-quality warnings.
-*/
-
 const airQualityAlerts=
 data.features.filter(feature=>{
 
 const p=feature.properties||{};
-
 
 const alertName=
 String(
 p.alert_name_en||""
 ).toLowerCase();
 
-
 const alertText=
 String(
 p.alert_text_en||""
 ).toLowerCase();
-
 
 const alertType=
 String(
 p.alert_type||""
 ).toLowerCase();
 
-
 const riskColour=
 String(
 p.risk_colour_en||""
 ).toLowerCase();
-
 
 const status=
 String(
 p.status_en||""
 ).toLowerCase();
 
-
 const isEnded=
 status.includes("ended");
-
 
 const isAirQuality=
 alertName.includes("air quality")||
 alertText.includes("wildfire smoke")||
 alertText.includes("air quality");
 
-
 const isWarning=
 alertType==="warning"||
 riskColour==="yellow"||
 riskColour==="orange"||
 riskColour==="red";
-
 
 return(
 !isEnded&&
@@ -865,7 +1044,6 @@ const matches=
 airQualityAlerts.filter(feature=>{
 
 const p=feature.properties||{};
-
 
 const possibleNames=[
 
@@ -914,11 +1092,6 @@ throw new Error(
 
 }
 
-
-/*
-Only the Invermere official warning region
-controls the automatic smoke safety state.
-*/
 
 smokeState=
 local.warning?
@@ -998,13 +1171,11 @@ r.warning?
 }).join("");
 
 
-const nearbyWarnings=
-smokeRegionResults.filter(
+if(
+smokeRegionResults.some(
 r=>!r.local&&r.warning
-);
-
-
-if(nearbyWarnings.length){
+)
+){
 
 html+=
 "<br><span class='small'>Warnings in nearby official regions are shown separately for context. They do not automatically mean Invermere's official area has the same conditions.</span>";
@@ -1016,14 +1187,6 @@ smokeBox.innerHTML=html;
 
 
 }catch(e){
-
-
-/*
-FAIL SAFE:
-
-If the official warning service cannot be verified,
-the engine must NOT say CLEAR.
-*/
 
 smokeState="HOLD";
 
@@ -1043,33 +1206,92 @@ e.message:
 
 
 /* =========================================================
-   POST SELECTION
+   POST SELECTION HELPERS
    ========================================================= */
+
+function shuffle(array){
+
+let copy=[...array];
+
+for(
+let i=copy.length-1;
+i>0;
+i--
+){
+
+let j=
+Math.floor(
+Math.random()*(i+1)
+);
+
+[
+copy[i],
+copy[j]
+]=[
+copy[j],
+copy[i]
+];
+
+}
+
+return copy;
+
+}
+
+
+/*
+Avoid giving three posts that all feel like
+the exact same question.
+*/
 
 function choosePosts(pool,count){
 
-let copy=[...pool];
+let shuffled=shuffle(pool);
 
 let selected=[];
 
+let usedTypes=[];
 
-while(
-copy.length&&
-selected.length<count
+
+for(let post of shuffled){
+
+if(
+selected.length>=count
+) break;
+
+
+if(
+usedTypes.includes(post.type)&&
+selected.length<pool.length-1
 ){
 
-let index=
-Math.floor(
-Math.random()*copy.length
-);
+continue;
+
+}
 
 
-selected.push(
-copy[index]
-);
+selected.push(post);
+
+usedTypes.push(post.type);
+
+}
 
 
-copy.splice(index,1);
+if(selected.length<count){
+
+for(let post of shuffled){
+
+if(
+selected.length>=count
+) break;
+
+if(!selected.includes(post)){
+
+selected.push(post);
+
+}
+
+}
 
 }
 
@@ -1080,24 +1302,79 @@ return selected;
 
 
 /* =========================================================
-   CONTENT ENGINE
+   CONTENT POOL SELECTION
+   ========================================================= */
+
+function getContentPool(level){
+
+if(level==="BLOCK"){
+
+return blockPosts;
+
+}
+
+
+if(level==="HOLD"){
+
+return holdPosts;
+
+}
+
+
+/*
+Normal mode.
+
+Use group activity to influence the tone.
+*/
+
+let activityValue=
+document.getElementById("activity").value;
+
+
+if(activityValue==="Very quiet"){
+
+return quietPosts;
+
+}
+
+
+if(activityValue==="Already active"){
+
+return activePosts;
+
+}
+
+
+return normalPosts;
+
+}
+
+
+/* =========================================================
+   ENGINE
    ========================================================= */
 
 function run(){
 
-let e=evac.value;
+let e=
+document.getElementById("evac").value;
 
-let s=smoke.value;
+let s=
+document.getElementById("smoke").value;
 
-let a=access.value;
+let a=
+document.getElementById("access").value;
 
-let w=weather.value;
+let w=
+document.getElementById("weather").value;
+
 
 let level="CLEAR";
 
 
 /*
-SERIOUS BLOCK
+If either automatic safety check has not successfully
+returned CLEAR, we do not allow normal hiking content.
 */
 
 if(
@@ -1116,10 +1393,6 @@ level="BLOCK";
 
 }
 
-
-/*
-HOLD / SAFETY-AWARE MODE
-*/
 
 else if(
 
@@ -1144,10 +1417,6 @@ level="HOLD";
 }
 
 
-/*
-NORMAL MODE
-*/
-
 else{
 
 level="CLEAR";
@@ -1155,18 +1424,18 @@ level="CLEAR";
 }
 
 
-let g=
+let gate=
 document.getElementById("gate");
 
 
-g.className=
+gate.className=
 "status "+
 level.toLowerCase();
 
 
 if(level==="CLEAR"){
 
-g.textContent=
+gate.textContent=
 "CLEAR — Normal content mode. Safety checks passed.";
 
 }
@@ -1174,91 +1443,77 @@ g.textContent=
 
 else if(level==="HOLD"){
 
-g.textContent=
-"HOLD — Safety-aware content mode. Hiking activity should not be encouraged right now.";
+gate.textContent=
+"HOLD — Safety-aware content mode. Hiking activity will not be encouraged.";
 
 }
 
 
 else{
 
-g.textContent=
-"BLOCK — Serious safety condition. Use only very conservative community content.";
+gate.textContent=
+"BLOCK — Serious safety condition. Only very conservative community content will be generated.";
 
 }
 
 
-let out=
-document.getElementById("results");
+/*
+Get the appropriate content pool.
+*/
 
-
-let pool;
-
-
-if(level==="CLEAR"){
-
-pool=normalPosts;
-
-}
-
-else if(level==="HOLD"){
-
-pool=safetyAwarePosts;
-
-}
-
-else{
-
-pool=seriousSafetyPosts;
-
-}
+let pool=
+getContentPool(level);
 
 
 let picks=
 choosePosts(pool,3);
 
 
+let out=
+document.getElementById("results");
+
+
+let explanation;
+
+
+if(level==="CLEAR"){
+
+explanation=
+"Normal group content. The wording is intentionally casual and avoids sounding like engagement-bait.";
+
+}
+
+else if(level==="HOLD"){
+
+explanation=
+"Safety-aware content. These posts are about hiking, future plans, preferences or past experiences without suggesting that anyone should hike right now or making claims about current conditions.";
+
+}
+
+else{
+
+explanation=
+"Very conservative content. These posts avoid encouraging outdoor activity.";
+
+}
+
+
 out.innerHTML=
 
 "<p class='small'>"+
-
-(
-
-level==="CLEAR"
-
-?
-
-"These are normal group posts."
-
-:
-
-level==="HOLD"
-
-?
-
-"These posts are intentionally written so they do not encourage current hiking activity or make claims about current Invermere conditions."
-
-:
-
-"These are very conservative posts that avoid encouraging outdoor activity."
-
-)+
-
+explanation+
 "</p>"+
-
 
 picks.map(p=>
 
 '<div class="post">'+
 
-p+
+p.text+
 
 '<br><br>'+
 
 '<button onclick="navigator.clipboard.writeText('+
-
-JSON.stringify(p)+
-
+JSON.stringify(p.text)+
 ')">Copy post</button>'+
 
 '</div>'
