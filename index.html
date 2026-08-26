@@ -1,138 +1,41 @@
 <!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Invermere Group Hiking — V2.4.3</title>
+<html><head><meta charset="utf-8">
+<title>Invermere Group Hiking — V2.4.4</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <style>
 body{font-family:Arial,sans-serif;max-width:1000px;margin:auto;padding:20px;background:#f5f4ef;color:#20231f}
-section{background:white;padding:18px;margin:14px 0;border:1px solid #ddd;border-radius:12px}
+section{background:#fff;padding:18px;margin:14px 0;border:1px solid #ddd;border-radius:12px}
 select,button{padding:10px;margin:5px;width:100%;font-size:15px}
-button{background:#2f6548;color:white;border:0;border-radius:8px;font-weight:bold}
-.status{padding:12px;border-radius:8px;margin-top:10px}
-.clear{background:#e8f5ec}
-.hold{background:#fff4d9}
-.block{background:#fde7e7}
-.post{white-space:pre-wrap;border:1px solid #ddd;padding:14px;border-radius:8px;margin:12px 0}
-.small{color:#666;font-size:13px}
-.region{padding:8px;margin:5px 0;border-radius:6px;background:#f5f5f5}
-</style>
-</head>
+button{background:#2f6548;color:#fff;border:0;border-radius:8px;font-weight:bold}
+.status{padding:12px;border-radius:8px;margin-top:10px}.clear{background:#e8f5ec}.hold{background:#fff4d9}.block{background:#fde7e7}
+.post{white-space:pre-wrap;border:1px solid #ddd;padding:14px;border-radius:8px;margin:12px 0}.small{color:#666;font-size:13px}.region{padding:8px;margin:5px 0;border-radius:6px;background:#f5f5f5}
+</style></head><body>
 
-<body>
+<h1>Invermere Group Hiking — Content Engine V2.4.4</h1>
 
-<h1>Invermere Group Hiking — Content Engine V2.4.3</h1>
+<section><h2>🔥 Live wildfire check</h2><p class="small">Checks official BC current-fire data against the hiking areas covered by this engine. Every area checked is shown below. Any relevant active fire or failed data check = HOLD.</p><button onclick="checkFire()">Check current wildfire data</button><div id="fire" class="status hold">HOLD — Not checked yet. Run the live check first.</div></section>
 
-<section>
-<h2>🔥 Live wildfire check</h2>
-<p class="small">
-Checks official BC current-fire data against the hiking areas covered by this engine.
-Every area checked is shown below.
-Any relevant active fire or failed data check = HOLD.
-</p>
-<button onclick="checkFire()">Check current wildfire data</button>
-<div id="fire" class="status hold">HOLD — Not checked yet. Run the live check first.</div>
+<section><h2>🌫️ Live smoke warning check</h2><p class="small">Checks official air-quality warnings for Invermere's official forecast/warning area. Nearby official regions are shown separately for context.</p><button onclick="checkSmokeWarning()">Check current smoke warnings</button><div id="smokeLive" class="status hold">HOLD — Not checked yet. Run the live smoke warning check first.</div></section>
+
+<section><h2>This week's context</h2>
+<label>Season</label><select id="season"><option>Off-season</option><option>Shoulder season</option><option selected>Peak hiking season</option><option>Winter</option></select>
+<label>Recent activity</label><select id="activity"><option>Very quiet</option><option selected>Some activity</option><option>Already active</option></select>
+<label>Recent Connect posts</label><select id="connect"><option>None recently</option><option>One recently</option><option>Several recently</option></select>
+<label>Recent member hike reports</label><select id="reports"><option>None recently</option><option>A few recently</option><option>Lots recently</option></select>
 </section>
 
-<section>
-<h2>🌫️ Live smoke warning check</h2>
-<p class="small">
-Checks official air-quality warnings for Invermere's official forecast/warning area.
-Nearby official regions are shown separately for context.
-</p>
-<button onclick="checkSmokeWarning()">Check current smoke warnings</button>
-<div id="smokeLive" class="status hold">HOLD — Not checked yet. Run the live smoke warning check first.</div>
+<section><h2>Manual Safety Gate</h2>
+<label>🚨 Evacuation</label><select id="evac"><option>CLEAR</option><option>ALERT</option><option>ORDER</option></select>
+<label>💨 Smoke</label><select id="smoke"><option>CLEAR</option><option>CAUTION</option><option>HOLD</option><option>BLOCK</option></select>
+<label>🚧 Access</label><select id="access"><option>CLEAR</option><option>HOLD</option><option>BLOCK</option></select>
+<label>🌦️ Weather</label><select id="weather"><option>NOT RELEVANT</option><option>CLEAR</option><option>HOLD</option><option>BLOCK</option></select>
+<button onclick="run()">Run this week's engine</button><div id="gate"></div>
 </section>
 
-<section>
-<h2>This week's context</h2>
-
-<label>Season</label>
-<select id="season">
-<option>Off-season</option>
-<option>Shoulder season</option>
-<option selected>Peak hiking season</option>
-<option>Winter</option>
-</select>
-
-<label>Recent activity</label>
-<select id="activity">
-<option>Very quiet</option>
-<option selected>Some activity</option>
-<option>Already active</option>
-</select>
-
-<label>Recent Connect posts</label>
-<select id="connect">
-<option>None recently</option>
-<option>One recently</option>
-<option>Several recently</option>
-</select>
-
-<label>Recent member hike reports</label>
-<select id="reports">
-<option>None recently</option>
-<option>A few recently</option>
-<option>Lots recently</option>
-</select>
-</section>
-
-<section>
-<h2>Manual Safety Gate</h2>
-
-<label>🚨 Evacuation</label>
-<select id="evac">
-<option>CLEAR</option>
-<option>ALERT</option>
-<option>ORDER</option>
-</select>
-
-<label>💨 Smoke</label>
-<select id="smoke">
-<option>CLEAR</option>
-<option>CAUTION</option>
-<option>HOLD</option>
-<option>BLOCK</option>
-</select>
-
-<label>🚧 Access</label>
-<select id="access">
-<option>CLEAR</option>
-<option>HOLD</option>
-<option>BLOCK</option>
-</select>
-
-<label>🌦️ Weather</label>
-<select id="weather">
-<option>NOT RELEVANT</option>
-<option>CLEAR</option>
-<option>HOLD</option>
-<option>BLOCK</option>
-</select>
-
-<button onclick="run()">Run this week's engine</button>
-<div id="gate"></div>
-</section>
-
-<section>
-<h2>Recommendations</h2>
-<div id="results">Run both live safety checks first.</div>
-</section>
+<section><h2>Recommendations</h2><div id="results">Run both live safety checks first.</div></section>
 
 <script>
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
-let fireState="UNCHECKED";
-let smokeState="UNCHECKED";
-let smokeRegionResults=[];
-
-/* =========================================================
-   WILDFIRE AREAS
-   ========================================================= */
+let fireState="UNCHECKED",smokeState="UNCHECKED",smokeRegionResults=[];
 
 const regions=[
 ["Invermere / Windermere",50.507,-116.024,25],
@@ -145,665 +48,119 @@ const regions=[
 ["Golden / Columbia Valley North",51.30,-116.97,35]
 ];
 
-/* =========================================================
-   CONTENT ENGINE — V2.4.3
-   =========================================================
-   Content direction:
-   - complete thoughts are the main type
-   - fewer questions
-   - a small number of casual discussion starters
-
-   Test:
-   "Would a real person independently think to post this?"
-
-   Avoid:
-   - generic AI-sounding hiking wisdom
-   - vague "deep" statements
-   - posts about hiking lists for their own sake
-   - "quietly" as filler
-   - fake memories or personal experiences
-   - claims that the poster is currently in Invermere
-   - current-condition claims
-*/
-
-const normalPosts=[
-
+/* Content direction: specific observations, real contrasts, and natural questions.
+Avoid generic "A trail doesn't have to..." wisdom and abstract hiking-list posts. */
+const shared=[
 {style:"complete",text:"Some hikes around Invermere get recommended so often that it's easy to forget there are probably a bunch of others people love just as much."},
-
 {style:"complete",text:"It seems like once a few hikes become the standard Invermere recommendations, they end up getting suggested over and over while everything else barely comes up."},
-
 {style:"complete",text:"There are probably some really good hikes around Invermere that just aren't the first ones people think to recommend."},
-
 {style:"complete",text:"The same few trails seem to come up again and again when people ask about hiking around Invermere."},
-
-{style:"complete",text:"A trail can be really good and still not be the one people automatically mention first when someone asks where to hike."},
-
-{style:"complete",text:"There are enough hiking options around Invermere that a lot of good trails probably get overlooked simply because people can't recommend everything at once."},
-
-{style:"complete",text:"The hikes that become the usual recommendations aren't necessarily the only ones people end up loving."},
-
+{style:"complete",text:"The best hike around Invermere probably changes depending on the day. Sometimes you'd want something challenging, and other times something easier with a good view would be exactly the right choice."},
 {style:"complete",text:"A lot of hiking recommendations seem to depend on which trails people happened to do first. That can make the same handful of hikes sound like the whole area."},
+{style:"complete",text:"There are probably a few hikes around Invermere that would come up a lot more if more people happened to know about them."}
+];
 
-{style:"complete",text:"There are probably a few hikes around Invermere that would come up a lot more if more people happened to know about them."},
-
-{style:"complete",text:"A good trail doesn't have to be the biggest day in the area to be worth doing. Sometimes the ones that fit into a normal day are the ones people actually get back to."},
-
+const normalPosts=[...shared,
+{style:"complete",text:"A lot of good trails probably get overlooked simply because people can't recommend everything at once."},
 {style:"question",text:"There are so many hikes around Invermere that it seems like the same handful always come up first. Are there any good ones that don't get mentioned as much?"},
-
 {style:"question",text:"Some hikes seem to become the default recommendation for a reason, but that doesn't mean they're everyone's favourite. Is there one around Invermere you think gets the hype for good reason?"},
-
 {style:"question",text:"A trail can be really good without being the obvious answer when someone asks where to hike. Any around Invermere come to mind?"},
-
 {style:"question",text:"Some people probably have a favourite hike they recommend every chance they get. Do you have one?"},
-
 {style:"question",text:"There are probably a few trails around Invermere that deserve to come up more often. Which ones?"},
-
-{style:"question",text:"Some hikes are worth repeating even when there are plenty of others left to try. Which ones keep making it back into the rotation?"},
-
 {style:"casual",text:"Which Invermere-area hike do you think gets recommended more than any other?"},
-
-{style:"casual",text:"Underrated hike or classic favourite?"},
-
-{style:"casual",text:"Repeat an old favourite or try somewhere new?"}
-
+{style:"casual",text:"Underrated hike or classic favourite?"}
 ];
 
-
-/* =========================================================
-   QUIET GROUP CONTENT
-   ========================================================= */
-
-const quietPosts=[
-
-{style:"complete",text:"Some hikes around Invermere get recommended so often that it's easy to forget there are probably a bunch of others people love just as much."},
-
-{style:"complete",text:"It seems like once a few hikes become the standard Invermere recommendations, they end up getting suggested over and over while everything else barely comes up."},
-
-{style:"complete",text:"There are probably some really good hikes around Invermere that just aren't the first ones people think to recommend."},
-
-{style:"complete",text:"The same few trails seem to come up again and again when people ask about hiking around Invermere."},
-
+const quietPosts=[...shared,
 {style:"complete",text:"When there are this many hiking options around one area, some good trails are bound to get less attention than they deserve."},
-
 {style:"complete",text:"A lot of people probably end up knowing the same handful of trails because those are the ones that get passed around most often."},
-
-{style:"complete",text:"A trail can be easy to overlook if nobody happens to mention it, especially when there are already so many well-known hikes around Invermere."},
-
 {style:"complete",text:"The usual hiking recommendations are useful, but they can make it easy to forget how much else there is around Invermere."},
-
-{style:"complete",text:"Some trails probably get missed simply because another more familiar hike is always the first one suggested."},
-
-{style:"complete",text:"There are enough hiking areas around Invermere that two people could probably have completely different favourite trails and both have a pretty good case for them."},
-
 {style:"question",text:"There are probably a few Invermere-area hikes that don't get mentioned very often but should. Any come to mind?"},
-
 {style:"question",text:"Some trails seem to get mentioned all the time, while others barely come up. Are there any around Invermere you think more people should know about?"},
-
 {style:"question",text:"A lot of good trails probably get overshadowed by the usual recommendations. Which ones?"},
-
-{style:"question",text:"If someone already knew the obvious Invermere hikes, where would you point them next?"},
-
-{style:"casual",text:"What's one hike around Invermere you don't hear mentioned enough?"},
-
-{style:"casual",text:"Best-known hike or best-kept-secret kind of hike?"},
-
-{style:"casual",text:"Any trail around Invermere that deserves more attention?"}
-
+{style:"casual",text:"What's one hike around Invermere you don't hear mentioned enough?"}
 ];
 
-
-/* =========================================================
-   ACTIVE GROUP CONTENT
-   ========================================================= */
-
-const activePosts=[
-
-{style:"complete",text:"Some hikes around Invermere get recommended so often that it's easy to forget there are probably a bunch of others people love just as much."},
-
-{style:"complete",text:"It seems like once a few hikes become the standard Invermere recommendations, they end up getting suggested over and over while everything else barely comes up."},
-
-{style:"complete",text:"The same few trails seem to come up again and again when people ask about hiking around Invermere."},
-
-{style:"complete",text:"There are probably some really good hikes around Invermere that just aren't the first ones people think to recommend."},
-
+const activePosts=[...shared,
 {style:"complete",text:"When people have different favourite hikes in the same area, it usually says as much about what they enjoy in a day as it does about the trails themselves."},
-
 {style:"complete",text:"A hike that one person calls the best in the area might not even make someone else's top five. There are enough different kinds of trails around Invermere for that to make sense."},
-
 {style:"complete",text:"The most popular hikes and the hikes people personally love aren't always the same thing."},
-
-{style:"complete",text:"Some trails probably become regular favourites because they're spectacular. Others probably make the cut because they just work well when there's time for a hike."},
-
-{style:"complete",text:"A trail doesn't have to be the biggest objective around to end up being the one someone recommends most often."},
-
-{style:"complete",text:"With enough hiking options nearby, the best trail for one day can be completely different from the best trail for another."},
-
-{style:"question",text:"The usual Invermere hikes get recommended for a reason, but there are plenty of other options too. Which trail would definitely make your own list of favourites?"},
-
-{style:"question",text:"Some hikes are popular with almost everyone, while others seem to have a smaller group of people who really love them. Which kind tends to become your favourite?"},
-
-{style:"question",text:"There are probably a few trails around Invermere that people would defend as their favourite even if they weren't the obvious choice. Do you have one?"},
-
 {style:"question",text:"If someone asked you for one hike around Invermere that isn't always the first one mentioned, what would you suggest?"},
-
-{style:"casual",text:"Most popular hike or personal favourite?"},
-
-{style:"casual",text:"Which trail around Invermere would you recommend after someone has already done the obvious ones?"},
-
-{style:"casual",text:"What makes a trail an actual favourite rather than just a good hike?"}
-
+{style:"question",text:"Some hikes are popular with almost everyone, while others seem to have a smaller group of people who really love them. Which kind tends to become your favourite?"},
+{style:"casual",text:"Most popular hike or personal favourite?"}
 ];
-
-
-/* =========================================================
-   HOLD CONTENT
-   =========================================================
-   No current-condition claims.
-   No suggestion that anyone should hike now.
-*/
 
 const holdPosts=[
-
 {style:"complete",text:"Some hikes around Invermere get recommended so often that it's easy to forget there are probably a bunch of others people love just as much."},
-
 {style:"complete",text:"The same few trails seem to come up again and again when people ask about hiking around Invermere."},
-
 {style:"complete",text:"There are probably some really good hikes around Invermere that just aren't the first ones people think to recommend."},
-
 {style:"complete",text:"It seems like once a few hikes become the standard Invermere recommendations, they end up getting suggested over and over while everything else barely comes up."},
-
-{style:"complete",text:"There are enough hiking options around Invermere that learning about one good trail probably leads to hearing about several more."},
-
-{style:"complete",text:"A lot of the usual hiking recommendations probably come from the same familiar handful of trails, even though the area has much more to it than that."},
-
-{style:"complete",text:"Some of the best hiking conversations are probably the ones where someone mentions a trail that wasn't already on everyone else's radar."},
-
-{style:"complete",text:"A trail doesn't have to be the biggest or most famous one around to end up being someone's favourite."},
-
+{style:"complete",text:"The best hike around Invermere probably changes depending on the day. Sometimes you'd want something challenging, and other times something easier with a good view would be exactly the right choice."},
 {style:"complete",text:"There are probably a few hikes around Invermere that people know about but never quite get around to looking into properly."},
-
-{style:"complete",text:"With this many hiking options around Invermere, there are probably trails people would choose differently depending on what kind of day they wanted."},
-
 {style:"question",text:"There are some hikes that sound good for a long time before people finally get around to them. Any around Invermere that have been on your radar for a while?"},
-
 {style:"question",text:"There are probably a few Invermere-area hikes that don't get mentioned much but people would still be interested to hear about. Any come to mind?"},
-
-{style:"question",text:"If the usual Invermere recommendations are only the starting point, what else belongs in the conversation?"},
-
 {style:"question",text:"Some trails get mentioned constantly and others barely at all. Which ones would you be curious to hear more about?"},
-
-{style:"casual",text:"What's one Invermere-area hike you'd still like to know more about?"},
-
-{style:"casual",text:"Obvious recommendation or something less commonly mentioned?"},
-
-{style:"casual",text:"Any trail around Invermere you keep hearing about?"}
-
+{style:"casual",text:"What's one Invermere-area hike you'd still like to know more about?"}
 ];
-
-
-/* =========================================================
-   BLOCK CONTENT
-   =========================================================
-   Very conservative. No encouragement of outdoor activity.
-*/
 
 const blockPosts=[
-
-{style:"complete",text:"A memorable hike isn't always the biggest or hardest one. Sometimes what people remember about a trail has nothing to do with the difficulty."},
-
 {style:"complete",text:"Two people can come away from the same trail with completely different ideas about what made it good."},
-
 {style:"complete",text:"The most popular trail in an area isn't automatically everyone's personal favourite."},
-
 {style:"complete",text:"Some trails stick in people's minds because of the destination, while others are remembered for the whole experience of getting there."},
-
-{style:"complete",text:"What makes a hike memorable is probably harder to explain than distance, elevation or a trail rating."},
-
-{style:"complete",text:"A favourite trail doesn't necessarily have to be the one with the biggest views or the hardest climb."},
-
 {style:"question",text:"Different people remember completely different things about a good hike. What tends to stick with you?"},
-
-{style:"question",text:"Some trails are memorable for the views and others for completely different reasons. What usually makes one stand out to you?"},
-
-{style:"casual",text:"What makes a hike memorable?"},
-
-{style:"casual",text:"Views, challenge or the overall experience?"}
-
+{style:"casual",text:"What makes a hike memorable?"}
 ];
 
-
-/* =========================================================
-   DISTANCE
-   ========================================================= */
-
-function dist(a,b,c,d){
-let R=6371,p=Math.PI/180;
-let x=Math.sin((c-a)*p/2)**2+
-Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2;
-return 2*R*Math.asin(Math.sqrt(x));
-}
-
-
-/* =========================================================
-   WILDFIRE CHECK
-   ========================================================= */
+function dist(a,b,c,d){let R=6371,p=Math.PI/180,x=Math.sin((c-a)*p/2)**2+Math.cos(a*p)*Math.cos(c*p)*Math.sin((d-b)*p/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 
 async function checkFire(){
-
-fireState="CHECKING";
-
-const fireBox=document.getElementById("fire");
-fireBox.className="status hold";
-fireBox.textContent="CHECKING — Contacting official BC current-fire data…";
-
-const q=new URLSearchParams({
-where:"1=1",
-outFields:"*",
-returnGeometry:"false",
-f:"json"
-});
-
-const url="https://delivery.maps.gov.bc.ca/arcgis/rest/services/mpcm/bcgwpub/MapServer/502/query?"+q.toString();
-
+fireState="CHECKING";let box=document.getElementById("fire");box.className="status hold";box.textContent="CHECKING — Contacting official BC current-fire data…";
 try{
-
-const r=await fetch(url,{method:"GET",mode:"cors",cache:"no-store"});
-
-if(!r.ok) throw new Error("HTTP "+r.status+" "+r.statusText);
-
-const d=await r.json();
-
-if(d.error) throw new Error(d.error.message||"Unknown ArcGIS error");
-
-if(!Array.isArray(d.features)){
-throw new Error("BC fire service response did not contain a feature list.");
+let q=new URLSearchParams({where:"1=1",outFields:"*",returnGeometry:"false",f:"json"});
+let r=await fetch("https://delivery.maps.gov.bc.ca/arcgis/rest/services/mpcm/bcgwpub/MapServer/502/query?"+q.toString(),{cache:"no-store"});
+if(!r.ok)throw Error("HTTP "+r.status+" "+r.statusText);let d=await r.json();if(d.error)throw Error(d.error.message||"Unknown ArcGIS error");if(!Array.isArray(d.features))throw Error("BC fire service response did not contain a feature list.");
+let results=regions.map(z=>({name:z[0],fires:[]}));
+for(let f of d.features){let a=f.attributes||{},lat=Number(a.LATITUDE),lng=Number(a.LONGITUDE),status=String(a.FIRE_STATUS||"").trim().toLowerCase();if(!Number.isFinite(lat)||!Number.isFinite(lng)||status==="out")continue;regions.forEach((z,i)=>{if(dist(z[1],z[2],lat,lng)<=z[3])results[i].fires.push({name:a.INCIDENT_NAME||"Unnamed fire",status:a.FIRE_STATUS||"Status unknown",size:a.CURRENT_SIZE})})}
+fireState=results.some(x=>x.fires.length)?"HOLD":"CLEAR";box.className="status "+(fireState==="CLEAR"?"clear":"hold");
+let h=fireState==="CLEAR"?"<b>CLEAR — No relevant active fires detected in the checked hiking areas.</b>":"<b>HOLD — A relevant active fire was detected in one or more checked hiking areas.</b>";h+="<br><br><b>Hiking areas checked:</b>";
+h+=results.map(x=>!x.fires.length?'<div class="region">✓ '+x.name+' — no relevant active fires detected</div>':'<div class="region">'+x.fires.map(f=>"⚠️ "+f.name+" — "+f.status+(f.size!==null&&f.size!==undefined&&f.size!==""?" — "+f.size+" ha":"")).join("<br>")+"<br><span class='small'>Area: "+x.name+"</span></div>").join("");
+h+="<br><span class='small'>The engine checks the current BC fire-location layer. A fire marked “Out” is excluded; other current fire statuses remain visible to the safety check.</span>";box.innerHTML=h;
+}catch(e){fireState="HOLD";box.className="status hold";box.textContent="HOLD — FIRE DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+(e&&e.message?e.message:"Unknown error")}
 }
-
-let areaResults=regions.map(z=>({name:z[0],fires:[]}));
-
-for(let f of d.features){
-
-let a=f.attributes||{};
-let lat=Number(a.LATITUDE);
-let lng=Number(a.LONGITUDE);
-
-if(!Number.isFinite(lat)||!Number.isFinite(lng)) continue;
-
-let status=String(a.FIRE_STATUS||"").trim().toLowerCase();
-
-if(status==="out") continue;
-
-regions.forEach((z,index)=>{
-if(dist(z[1],z[2],lat,lng)<=z[3]){
-areaResults[index].fires.push({
-name:a.INCIDENT_NAME||"Unnamed fire",
-status:a.FIRE_STATUS||"Status unknown",
-size:a.CURRENT_SIZE,
-description:a.GEOGRAPHIC_DESCRIPTION||""
-});
-}
-});
-}
-
-const affectedAreas=areaResults.filter(x=>x.fires.length>0);
-
-fireState=affectedAreas.length?"HOLD":"CLEAR";
-
-fireBox.className="status "+(fireState==="CLEAR"?"clear":"hold");
-
-let html="";
-
-if(fireState==="CLEAR"){
-html+="<b>CLEAR — No relevant active fires detected in the checked hiking areas.</b>";
-}else{
-html+="<b>HOLD — A relevant active fire was detected in one or more checked hiking areas.</b>";
-}
-
-html+="<br><br><b>Hiking areas checked:</b>";
-
-html+=areaResults.map(x=>{
-
-if(!x.fires.length){
-return '<div class="region">✓ '+x.name+' — no relevant active fires detected</div>';
-}
-
-let fireDetails=x.fires.map(f=>{
-let detail="⚠️ "+f.name+" — "+f.status;
-if(f.size!==null&&f.size!==undefined&&f.size!==""){
-detail+=" — "+f.size+" ha";
-}
-return detail;
-}).join("<br>");
-
-return '<div class="region">'+fireDetails+
-"<br><span class='small'>Area: "+x.name+"</span></div>";
-
-}).join("");
-
-html+="<br><span class='small'>The engine checks the current BC fire-location layer. A fire marked “Out” is excluded; other current fire statuses remain visible to the safety check.</span>";
-
-fireBox.innerHTML=html;
-
-}catch(e){
-
-fireState="HOLD";
-fireBox.className="status hold";
-fireBox.textContent="HOLD — FIRE DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+(e&&e.message?e.message:"Unknown error");
-
-}
-
-}
-
-
-/* =========================================================
-   SMOKE WARNING REGIONS
-   ========================================================= */
 
 const smokeRegions=[
 {name:"East Kootenay - north including Invermere",displayName:"Invermere's official forecast/warning area",local:true},
 {name:"East Kootenay - south including Cranbrook",displayName:"East Kootenay south / Cranbrook area",local:false},
-{name:"Elk Valley",displayName:"Elk Valley",local:false},
-{name:"Kootenay Lake",displayName:"Kootenay Lake",local:false},
-{name:"West Kootenay",displayName:"West Kootenay",local:false},
-{name:"East Columbia",displayName:"East Columbia",local:false},
-{name:"West Columbia",displayName:"West Columbia",local:false},
-{name:"Yoho Park - Kootenay Park",displayName:"Yoho / Kootenay Park",local:false}
+{name:"Elk Valley",displayName:"Elk Valley",local:false},{name:"Kootenay Lake",displayName:"Kootenay Lake",local:false},
+{name:"West Kootenay",displayName:"West Kootenay",local:false},{name:"East Columbia",displayName:"East Columbia",local:false},
+{name:"West Columbia",displayName:"West Columbia",local:false},{name:"Yoho Park - Kootenay Park",displayName:"Yoho / Kootenay Park",local:false}
 ];
 
-
-/* =========================================================
-   SMOKE CHECK
-   ========================================================= */
-
 async function checkSmokeWarning(){
-
-smokeState="CHECKING";
-smokeRegionResults=[];
-
-const smokeBox=document.getElementById("smokeLive");
-smokeBox.className="status hold";
-smokeBox.textContent="CHECKING — Contacting official current air-quality warning data…";
-
+smokeState="CHECKING";let box=document.getElementById("smokeLive");box.className="status hold";box.textContent="CHECKING — Contacting official current air-quality warning data…";
 try{
-
-const url="https://api.weather.gc.ca/collections/weather-alerts/items?"+
-"f=json&limit=1000&filter="+encodeURIComponent("properties.province=BC");
-
-const r=await fetch(url,{method:"GET",mode:"cors",cache:"no-store"});
-
-if(!r.ok) throw new Error("HTTP "+r.status+" "+r.statusText);
-
-const data=await r.json();
-
-if(!data||data.type!=="FeatureCollection"||!Array.isArray(data.features)){
-throw new Error("Official warning service returned an unexpected response.");
+let url="https://api.weather.gc.ca/collections/weather-alerts/items?f=json&limit=1000&filter="+encodeURIComponent("properties.province=BC");
+let r=await fetch(url,{cache:"no-store"});if(!r.ok)throw Error("HTTP "+r.status+" "+r.statusText);let data=await r.json();if(!data||data.type!=="FeatureCollection"||!Array.isArray(data.features))throw Error("Official warning service returned an unexpected response.");
+let alerts=data.features.filter(f=>{let p=f.properties||{},n=String(p.alert_name_en||"").toLowerCase(),t=String(p.alert_text_en||"").toLowerCase(),type=String(p.alert_type||"").toLowerCase(),risk=String(p.risk_colour_en||"").toLowerCase(),status=String(p.status_en||"").toLowerCase();return !status.includes("ended")&&(n.includes("air quality")||t.includes("wildfire smoke")||t.includes("air quality"))&&(type==="warning"||["yellow","orange","red"].includes(risk))});
+let norm=v=>String(v||"").toLowerCase().replace(/[–—]/g,"-").replace(/\s+/g," ").trim();
+smokeRegionResults=smokeRegions.map(region=>({...region,alerts:alerts.filter(f=>{let p=f.properties||{},names=[p.feature_name_en,p.location_name_en,p.region_name_en].map(norm);return names.includes(norm(region.name))})}));
+smokeRegionResults.forEach(x=>x.warning=x.alerts.length>0);let local=smokeRegionResults.find(x=>x.local);if(!local)throw Error("Could not identify Invermere's official forecast/warning area.");
+smokeState=local.warning?"HOLD":"CLEAR";box.className="status "+(smokeState==="CLEAR"?"clear":"hold");
+let h;if(local.warning){let p=(local.alerts[0]||{}).properties||{},impact=p.impact_en?" Impact: "+p.impact_en+".":"";h="<b>LOCAL WARNING:</b> An official air-quality warning is currently in effect for Invermere's official forecast/warning area."+impact+"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere. It does not mean northeast Kootenay.</span>"}else h="<b>LOCAL AREA:</b> No official air-quality warning was detected for Invermere's official forecast/warning area after a successful check of the current official BC alert data.<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere.</span>";
+h+="<br><br><b>Official regions checked:</b>"+smokeRegionResults.map(x=>'<div class="region">'+(x.warning?"⚠️ ":"✓ ")+x.displayName+" — "+(x.warning?"official air-quality warning":"no air-quality warning detected")+"</div>").join("");if(smokeRegionResults.some(x=>!x.local&&x.warning))h+="<br><span class='small'>Warnings in nearby official regions are shown separately for context. They do not automatically mean Invermere's official area has the same conditions.</span>";box.innerHTML=h;
+}catch(e){smokeState="HOLD";box.className="status hold";box.textContent="HOLD — SMOKE WARNING DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+(e&&e.message?e.message:"Unknown error")}
 }
 
-const airQualityAlerts=data.features.filter(feature=>{
-
-const p=feature.properties||{};
-
-const alertName=String(p.alert_name_en||"").toLowerCase();
-const alertText=String(p.alert_text_en||"").toLowerCase();
-const alertType=String(p.alert_type||"").toLowerCase();
-const riskColour=String(p.risk_colour_en||"").toLowerCase();
-const status=String(p.status_en||"").toLowerCase();
-
-const isEnded=status.includes("ended");
-
-const isAirQuality=
-alertName.includes("air quality")||
-alertText.includes("wildfire smoke")||
-alertText.includes("air quality");
-
-const isWarning=
-alertType==="warning"||
-riskColour==="yellow"||
-riskColour==="orange"||
-riskColour==="red";
-
-return !isEnded&&isAirQuality&&isWarning;
-
-});
-
-function normalizeName(value){
-return String(value||"")
-.toLowerCase()
-.replace(/[–—]/g,"-")
-.replace(/\s+/g," ")
-.trim();
-}
-
-for(let region of smokeRegions){
-
-const target=normalizeName(region.name);
-
-const matches=airQualityAlerts.filter(feature=>{
-
-const p=feature.properties||{};
-
-const possibleNames=[
-p.feature_name_en,
-p.location_name_en,
-p.region_name_en
-].map(normalizeName).filter(Boolean);
-
-return possibleNames.includes(target);
-
-});
-
-smokeRegionResults.push({
-...region,
-warning:matches.length>0,
-alerts:matches
-});
-
-}
-
-const local=smokeRegionResults.find(r=>r.local);
-
-if(!local){
-throw new Error("Could not identify Invermere's official forecast/warning area.");
-}
-
-smokeState=local.warning?"HOLD":"CLEAR";
-
-smokeBox.className="status "+(smokeState==="CLEAR"?"clear":"hold");
-
-let html="";
-
-if(local.warning){
-
-const p=(local.alerts[0]||{}).properties||{};
-const impact=p.impact_en?" Impact: "+p.impact_en+".":"";
-
-html="<b>LOCAL WARNING:</b> An official air-quality warning is currently in effect for Invermere's official forecast/warning area."+impact+
-"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere. It does not mean northeast Kootenay.</span>";
-
-}else{
-
-html="<b>LOCAL AREA:</b> No official air-quality warning was detected for Invermere's official forecast/warning area after a successful check of the current official BC alert data."+
-"<br><br><span class='small'>Environment Canada officially calls this area “East Kootenay — north including Invermere.” This means the northern part of the East Kootenay forecast region that includes Invermere.</span>";
-
-}
-
-html+="<br><br><b>Official regions checked:</b>";
-
-html+=smokeRegionResults.map(r=>{
-return '<div class="region">'+
-(r.warning?"⚠️ ":"✓ ")+
-r.displayName+" — "+
-(r.warning?"official air-quality warning":"no air-quality warning detected")+
-"</div>";
-}).join("");
-
-if(smokeRegionResults.some(r=>!r.local&&r.warning)){
-html+="<br><span class='small'>Warnings in nearby official regions are shown separately for context. They do not automatically mean Invermere's official area has the same conditions.</span>";
-}
-
-smokeBox.innerHTML=html;
-
-}catch(e){
-
-smokeState="HOLD";
-smokeBox.className="status hold";
-smokeBox.textContent="HOLD — SMOKE WARNING DATA CHECK FAILED. Do not publish until manually reviewed. Diagnostic: "+(e&&e.message?e.message:"Unknown error");
-
-}
-
-}
-
-
-/* =========================================================
-   POST SELECTION
-   ========================================================= */
-
-function shuffle(array){
-let copy=[...array];
-for(let i=copy.length-1;i>0;i--){
-let j=Math.floor(Math.random()*(i+1));
-[copy[i],copy[j]]=[copy[j],copy[i]];
-}
-return copy;
-}
-
-
-/* =========================================================
-   CONTENT SELECTION
-   =========================================================
-   Approximate mix across runs:
-   50% complete thoughts
-   30% natural questions
-   20% casual starters
-
-   Each run prioritises two complete thoughts, then rotates
-   the third recommendation between the other two styles.
-*/
-
-function choosePosts(pool){
-
-let complete=shuffle(pool.filter(p=>p.style==="complete"));
-let questions=shuffle(pool.filter(p=>p.style==="question"));
-let casual=shuffle(pool.filter(p=>p.style==="casual"));
-
-let selected=[];
-
-if(complete[0]) selected.push(complete[0]);
-if(complete[1]) selected.push(complete[1]);
-
-let thirdPool=Math.random()<0.60?questions:casual;
-
-if(!thirdPool.length){
-thirdPool=questions.length?questions:casual;
-}
-
-if(thirdPool[0]) selected.push(thirdPool[0]);
-
-if(selected.length<3){
-
-let remaining=shuffle(pool.filter(p=>!selected.includes(p)));
-
-for(let post of remaining){
-if(selected.length>=3) break;
-selected.push(post);
-}
-
-}
-
-return shuffle(selected);
-
-}
-
-
-/* =========================================================
-   CONTENT POOL
-   ========================================================= */
-
-function getContentPool(level){
-
-if(level==="BLOCK") return blockPosts;
-if(level==="HOLD") return holdPosts;
-
-let activityValue=document.getElementById("activity").value;
-
-if(activityValue==="Very quiet") return quietPosts;
-if(activityValue==="Already active") return activePosts;
-
-return normalPosts;
-
-}
-
-
-/* =========================================================
-   ENGINE
-   ========================================================= */
+function shuffle(a){let x=[...a];for(let i=x.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+function choosePosts(pool){let complete=shuffle(pool.filter(p=>p.style==="complete")),questions=shuffle(pool.filter(p=>p.style==="question")),casual=shuffle(pool.filter(p=>p.style==="casual")),out=[];if(complete[0])out.push(complete[0]);if(complete[1])out.push(complete[1]);let third=Math.random()<.60?questions:casual;if(!third.length)third=questions.length?questions:casual;if(third[0])out.push(third[0]);return shuffle(out)}
+function getContentPool(level){if(level==="BLOCK")return blockPosts;if(level==="HOLD")return holdPosts;let a=document.getElementById("activity").value;return a==="Very quiet"?quietPosts:a==="Already active"?activePosts:normalPosts}
 
 function run(){
-
-let e=document.getElementById("evac").value;
-let s=document.getElementById("smoke").value;
-let a=document.getElementById("access").value;
-let w=document.getElementById("weather").value;
-
-let level="CLEAR";
-
-if(e==="ORDER"||s==="BLOCK"||a==="BLOCK"||w==="BLOCK"){
-level="BLOCK";
+let e=evac.value,s=smoke.value,a=access.value,w=weather.value,level="CLEAR";
+if(e==="ORDER"||s==="BLOCK"||a==="BLOCK"||w==="BLOCK")level="BLOCK";
+else if(fireState!=="CLEAR"||smokeState!=="CLEAR"||e==="ALERT"||s==="CAUTION"||s==="HOLD"||a==="HOLD"||w==="HOLD")level="HOLD";
+let gate=document.getElementById("gate");gate.className="status "+level.toLowerCase();gate.textContent=level==="CLEAR"?"CLEAR — Normal content mode. Safety checks passed.":level==="HOLD"?"HOLD — Safety-aware content mode. Hiking activity will not be encouraged.":"BLOCK — Serious safety condition. Only very conservative community content will be generated.";
+let picks=choosePosts(getContentPool(level)),explanation=level==="CLEAR"?"Normal group content. Complete thoughts are prioritised, with occasional natural questions and casual discussion starters.":level==="HOLD"?"Safety-aware content. These posts stay connected to hiking without suggesting that anyone should hike right now or making claims about current conditions.":"Very conservative content. These posts avoid encouraging outdoor activity.";
+results.innerHTML="<p class='small'>"+explanation+"</p>"+picks.map(p=>'<div class="post">'+p.text+'<br><br><button onclick="navigator.clipboard.writeText('+JSON.stringify(p.text)+')">Copy post</button></div>').join("");
 }
-else if(
-fireState!=="CLEAR"||
-smokeState!=="CLEAR"||
-e==="ALERT"||
-s==="CAUTION"||
-s==="HOLD"||
-a==="HOLD"||
-w==="HOLD"
-){
-level="HOLD";
-}
-
-let gate=document.getElementById("gate");
-gate.className="status "+level.toLowerCase();
-
-if(level==="CLEAR"){
-gate.textContent="CLEAR — Normal content mode. Safety checks passed.";
-}
-else if(level==="HOLD"){
-gate.textContent="HOLD — Safety-aware content mode. Hiking activity will not be encouraged.";
-}
-else{
-gate.textContent="BLOCK — Serious safety condition. Only very conservative community content will be generated.";
-}
-
-let pool=getContentPool(level);
-let picks=choosePosts(pool);
-let out=document.getElementById("results");
-
-let explanation;
-
-if(level==="CLEAR"){
-explanation="Normal group content. Complete thoughts are prioritised, with occasional natural questions and casual discussion starters.";
-}
-else if(level==="HOLD"){
-explanation="Safety-aware content. These posts stay connected to hiking without suggesting that anyone should hike right now or making claims about current conditions.";
-}
-else{
-explanation="Very conservative content. These posts avoid encouraging outdoor activity.";
-}
-
-out.innerHTML=
-"<p class='small'>"+explanation+"</p>"+
-picks.map(p=>
-'<div class="post">'+
-p.text+
-'<br><br>'+
-'<button onclick="navigator.clipboard.writeText('+JSON.stringify(p.text)+')">Copy post</button>'+
-'</div>'
-).join("");
-
-}
-
-</script>
-
-</body>
-</html>
+</script></body></html>
